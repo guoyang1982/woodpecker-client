@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Premain-Class: com.gy.woodpecker.agent.WpClientAgent
+Can-Redefine-Classes: true
+
