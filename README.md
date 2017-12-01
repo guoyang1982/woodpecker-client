@@ -6,7 +6,7 @@
 # 如何使用
 
 ## 1.clone代码（可选，已经发布到中央仓库，可以直接依赖中央仓库的稳定版本）
-    git clone git@github.com:guoyang1982/wpclient-agent.git
+    git clone git@github.com:guoyang1982/woodpecker-client.git
 ## 2.编译安装（可选）
 
     cd wpclient-agent/bin
