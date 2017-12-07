@@ -2,6 +2,7 @@ package com.gy.woodpecker.agent;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.net.MalformedURLException;
 import java.util.jar.JarFile;
 
@@ -15,7 +16,37 @@ public class WpClientAgent {
 
     }
 
-    public static void agentmain(String args, Instrumentation inst) {main(args, inst);
+    public static void agentmain(String args, Instrumentation inst) {
+        main(args, inst);
+//        Class[] classes = inst.getAllLoadedClasses();
+//        for(Class clazz:classes){
+//
+//            if(clazz.getName().equals("com.letv.sched.service.impl.AppInfoServerImpl")){
+//                System.out.println("???????????????????"+clazz.getName());
+//                SpyTransformer transformer = new SpyTransformer("getLists");
+//                inst.addTransformer(transformer,true);
+//                try {
+//                    inst.retransformClasses(clazz);
+//                } catch (UnmodifiableClassException e) {
+//                    e.printStackTrace();
+//                }finally {
+//                    inst.removeTransformer(transformer);
+//                }
+//            }
+//            if(clazz.getName().equals("com.letv.sched.controller.Tlog")){
+//                System.out.println("???????????????????"+clazz.getName());
+//                SpyTransformer transformer = new SpyTransformer("getT");
+//
+//                inst.addTransformer(transformer,true);
+//                try {
+//                    inst.retransformClasses(clazz);
+//                } catch (UnmodifiableClassException e) {
+//                    e.printStackTrace();
+//                }finally {
+//                    inst.removeTransformer(transformer);
+//                }
+//            }
+      //  }
     }
 
     private static void main(String agentArgs, Instrumentation inst) {

@@ -8,6 +8,7 @@ import com.gy.woodpecker.message.MessageBean;
 import com.gy.woodpecker.redis.RedisClient;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import com.gy.woodpecker.tools.IPUtile;
+import com.gy.woodpecker.transformer.SpyTransformer;
 import com.gy.woodpecker.transformer.WoodpeckTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -16,6 +17,7 @@ import org.slf4j.ILoggerFactory;
 import org.slf4j.LoggerFactory;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -30,7 +32,7 @@ import java.util.concurrent.*;
 public class LoggerFacility {
     private static volatile LoggerFacility loggerFacility;
 
-    private static Instrumentation inst;
+    public static Instrumentation inst;
     protected RedisClient redisClient;
 
     private volatile String  appName;
@@ -195,144 +197,34 @@ public class LoggerFacility {
         }
     }
 
-    public static String getLogInfor(String filterLog){
-        String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
-        StringBuffer strLog = new StringBuffer();
 
-        if(logerT.equals("log4j")){
-            if (getAppLog4jInfo(filterLog, strLog)) return strLog.toString();
-        }else if(logerT.equals("logback")){
-            if (getAppLogbackInfo(filterLog, strLog)) return strLog.toString();
-        }
-
-        return strLog.toString();
-    }
-
-    private static boolean getAppLogbackInfo(String filterLog, StringBuffer strLog) {
+    public void setT(){
         Class[] classes = inst.getAllLoadedClasses();
-        for(Class clazz:classes){
-            if(clazz.getName().equals("org.slf4j.LoggerFactory")){
+        for(Class clazz:classes) {
 
-                    try {
-                        //获取的都是业务应用的加载类 因为classloader隔离，不能够直接获取对象进行转换 java.lang.ClassCastException: ch.qos.logback.classic.Logger cannot be cast to ch.qos.logback.classic.Logger
-                        ClassLoader appClassLoader = clazz.getClassLoader();
-                        log.info(appClassLoader.toString());
-                        final Object objectOfILoggerFactory = clazz.getMethod("getILoggerFactory").invoke(null);
-                        final Class<?> classOfLoggerContext = appClassLoader.loadClass("ch.qos.logback.classic.LoggerContext");
-                        final Class<?> classOfLogger = appClassLoader.loadClass("ch.qos.logback.classic.Logger");
-                        final Object objectOfLogs = classOfLoggerContext.getMethod("getLoggerList").invoke(objectOfILoggerFactory);
-                        List lists = (List)objectOfLogs;
-                        for(int i=0;i<lists.size();i++){
-                            Object objectOfLog = lists.get(i);
-                            String logName = (String)classOfLogger.getMethod("getName").invoke(objectOfLog);
-                            if(StringUtils.isNotBlank(filterLog) ){
-                                if(logName.startsWith(filterLog)){
-                                    strLog.append(logName).append("\r\n");
-                                }
-                            }else{
-                                strLog.append(logName).append("\r\n");
-                            }
-                        }
-                    }catch (Exception e){
-                        log.info(e.getMessage());
-                    }
-
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private static boolean getAppLog4jInfo(String filterLog, StringBuffer strLog) {
-        Class[] classes = inst.getAllLoadedClasses();
-        for(Class clazz:classes){
-
-            if(clazz.getName().equals("org.apache.log4j.LogManager")){
+            if (clazz.getName().equals("com.letv.sched.service.impl.AppInfoServerImpl")) {
+                System.out.println("???????????????????" + clazz.getName());
+                SpyTransformer transformer = new SpyTransformer("getLists");
+                inst.addTransformer(transformer, true);
                 try {
-                    //获取的都是业务应用的加载类 因为classloader隔离，不能够直接获取对象进行转换 java.lang.ClassCastException
-                    ClassLoader appClassLoader = clazz.getClassLoader();
-                    final Class<?> classOfLogger = appClassLoader.loadClass("org.apache.log4j.Logger");
-
-                    final Object objectOfCurrentLoggers  = clazz.getMethod("getCurrentLoggers").invoke(null);
-                    Enumeration enumeration = (Enumeration)objectOfCurrentLoggers;
-                    while (enumeration.hasMoreElements()){
-                        Object loggerObj = enumeration.nextElement();
-                        String logName = (String)classOfLogger.getMethod("getName").invoke(loggerObj);
-                        if(StringUtils.isNotBlank(filterLog) ){
-                            if(logName.startsWith(filterLog)){
-                                strLog.append(logName).append("\r\n");
-                            }
-                        }else{
-                            strLog.append(logName).append("\r\n");
-                        }
-                    }
-
-                } catch (Exception e) {
-                    log.info(e.getMessage());
-                }
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public static void setLogLevel(String className,String level){
-        String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
-        if(logerT.equals("log4j")){
-            setAppLog4jLevel(className, level);
-        }else if(logerT.equals("logback")) {
-            setAppLogbackLevel(className, level);
-        }
-    }
-
-    private static void setAppLogbackLevel(String className, String level) {
-        //获取业务系统所有已经加载的类
-        Class[] classes = inst.getAllLoadedClasses();
-        for (Class clazz : classes) {
-            if (clazz.getName().equals("org.slf4j.LoggerFactory")) {
-                try {
-                    //获取的都是业务应用的加载类 因为classloader隔离，不能够直接获取对象进行转换 java.lang.ClassCastException: ch.qos.logback.classic.Logger cannot be cast to ch.qos.logback.classic.Logger
-                    ClassLoader appClassLoader = clazz.getClassLoader();
-                    log.info(appClassLoader.toString());
-                    final Class<?> classOfLoggerContext = appClassLoader.loadClass("ch.qos.logback.classic.LoggerContext");
-                    final Class<?> classOfLogger = appClassLoader.loadClass("ch.qos.logback.classic.Logger");
-                    final Class<?> classOfLevel = appClassLoader.loadClass("ch.qos.logback.classic.Level");
-
-                    final Object objectOfILoggerFactory = clazz.getMethod("getILoggerFactory").invoke(null);
-                    //获取logger 对像
-                    final Object objectOfLogger = classOfLoggerContext.getMethod("getLogger",String.class).invoke(objectOfILoggerFactory,className);
-                    if(null != objectOfLogger){
-                        //获取level对象
-                        final Object objectOfLevel = classOfLevel.getMethod("toLevel",String.class).invoke(null,level);
-                        classOfLogger.getMethod("setLevel",classOfLevel).invoke(objectOfLogger,objectOfLevel);
-                    }
-                } catch (Exception e) {
-                    log.info(e.getMessage());
+                    inst.retransformClasses(clazz);
+                } catch (UnmodifiableClassException e) {
+                    e.printStackTrace();
+                } finally {
+                    inst.removeTransformer(transformer);
                 }
             }
-        }
-    }
+            if (clazz.getName().equals("com.letv.sched.controller.Tlog")) {
+                System.out.println("???????????????????" + clazz.getName());
+                SpyTransformer transformer = new SpyTransformer("getT");
 
-    private static void setAppLog4jLevel(String className, String level) {
-        //获取业务系统所有已经加载的类
-        Class[] classes = inst.getAllLoadedClasses();
-        for (Class clazz : classes) {
-            if (clazz.getName().equals("org.apache.log4j.LogManager")) {
+                inst.addTransformer(transformer, true);
                 try {
-                    //获取的都是业务应用的加载类 因为classloader隔离，不能够直接获取对象进行转换
-                    ClassLoader appClassLoader = clazz.getClassLoader();
-                    log.info(appClassLoader.toString());
-                    final Class<?> classOfLogger = appClassLoader.loadClass("org.apache.log4j.Logger");
-                    final Class<?> classOfLevel = appClassLoader.loadClass("org.apache.log4j.Level");
-                    //获取logger 对像
-                    final Object objectOfLogger = clazz.getMethod("exists",String.class).invoke(null,className);
-                    if(null != objectOfLogger){
-                        //获取level对象
-                        final Object objectOfLevel = classOfLevel.getMethod("toLevel",String.class).invoke(null,level);
-                        classOfLogger.getMethod("setLevel",classOfLevel).invoke(objectOfLogger,objectOfLevel);
-                    }
-                } catch (Exception e) {
-                    log.info(e.getMessage());
+                    inst.retransformClasses(clazz);
+                } catch (UnmodifiableClassException e) {
+                    e.printStackTrace();
+                } finally {
+                    inst.removeTransformer(transformer);
                 }
             }
         }
