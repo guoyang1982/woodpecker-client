@@ -18,10 +18,15 @@ import java.lang.instrument.Instrumentation;
         eg = {
                 "quit"
         })
-public class QuitCommand implements Command {
+public class QuitCommand extends AbstractCommand {
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
-        ChannelFuture future = ctx.writeAndFlush("Bye!\r\n");
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
+        ChannelFuture future = ctxT.writeAndFlush("Bye!\r\n");
         future.addListener(ChannelFutureListener.CLOSE);
 
     }

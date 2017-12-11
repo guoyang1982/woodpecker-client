@@ -18,23 +18,28 @@ import java.lang.instrument.Instrumentation;
         eg = {
                 "slog true"
         })
-public class LogSendMgeCommand implements Command {
+public class LogSendMgeCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "isSend", isRequired = true, summary = "是否发送异常日志消息")
     private String isSend;
 
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
 
         if (isSend.equals("true")) {
             LoggerFacility.f = true;
-            ctx.writeAndFlush("成功打开日志监控!\r\n");
+            ctxT.writeAndFlush("成功打开日志监控!\r\n");
             return;
         }
         if (isSend.equals("false")) {
             LoggerFacility.getInstall(null).f = false;
-            ctx.writeAndFlush("成功关闭日志监控!\r\n");
+            ctxT.writeAndFlush("成功关闭日志监控!\r\n");
             return;
         }
-        ctx.writeAndFlush("参数错误!\r\n");
+        ctxT.writeAndFlush("参数错误!\r\n");
     }
 }

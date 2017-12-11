@@ -17,9 +17,14 @@ import java.util.*;
         eg = {
                 "help"
         })
-public class HelpCommand implements Command{
+public class HelpCommand extends AbstractCommand{
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
         StringBuffer str = new StringBuffer();
         Map<String, Class<?>> commandMap = Commands.getInstance().listCommands();
         final List<Class<?>> classes = new ArrayList<Class<?>>(commandMap.values());
@@ -44,8 +49,8 @@ public class HelpCommand implements Command{
                 }
             }
         }
-        ctx.writeAndFlush("==========================================\r\n");
-        ctx.writeAndFlush(str.toString());
-        ctx.writeAndFlush("==========================================");
+        ctxT.writeAndFlush("==========================================\r\n");
+        ctxT.writeAndFlush(str.toString());
+        ctxT.writeAndFlush("==========================================");
     }
 }

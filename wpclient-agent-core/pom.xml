@@ -88,12 +88,16 @@
         </dependency>
 
         <dependency>
-            <groupId>javassist</groupId>
+            <groupId>org.javassist</groupId>
             <artifactId>javassist</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
         </dependency>
         <dependency>
             <groupId>net.sf.jopt-simple</groupId>

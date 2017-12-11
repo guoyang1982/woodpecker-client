@@ -12,5 +12,5 @@ import java.lang.instrument.Instrumentation;
  */
 public interface CommandHandler {
 
-    void executeCommand(final String line, final ChannelHandlerContext ctx,Instrumentation inst) throws IOException;
+    void executeCommand(final String line, final ChannelHandlerContext ctx,Instrumentation inst,int sessionId) throws IOException;
 }

@@ -17,10 +17,15 @@ import java.lang.instrument.Instrumentation;
         eg = {
                 "thread"
         })
-public class LogThreadInfoCommand implements Command {
+public class LogThreadInfoCommand extends AbstractCommand {
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
        String threadInfo = LoggerFacility.threadPoolsMonitor()+"\r\n";
-        ctx.writeAndFlush(threadInfo);
+        ctxT.writeAndFlush(threadInfo);
     }
 }

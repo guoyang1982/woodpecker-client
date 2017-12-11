@@ -22,11 +22,17 @@ import java.util.List;
                 "loginfo com.gy",
                 "loginfo"
         })
-public class LogInfoCommand implements Command{
+public class LogInfoCommand extends AbstractCommand{
     @IndexArg(index = 0, name = "class-pattern",isRequired = false,summary = "类路径名")
     private String classPattern;
+
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
 
         String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
         StringBuffer strLog = new StringBuffer();
@@ -37,7 +43,7 @@ public class LogInfoCommand implements Command{
             getAppLogbackInfo(classPattern, strLog,inst);
         }
 
-        ctx.writeAndFlush(strLog.toString());
+        ctxT.writeAndFlush(strLog.toString());
     }
 
 

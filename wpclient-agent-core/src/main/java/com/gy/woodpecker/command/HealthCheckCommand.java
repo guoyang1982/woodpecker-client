@@ -19,19 +19,25 @@ import java.lang.instrument.Instrumentation;
                 "hc true",
                 "hc false"
         })
-public class HealthCheckCommand implements Command {
+public class HealthCheckCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "isHC", isRequired = true, summary = "设置健康检查开关")
     private String isHC;
+
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
         if (isHC.equals("true")) {
             LoggerFacility.getInstall(null).telHealthCheck = true;
-            ctx.writeAndFlush("成功打开健康检查!\r\n");
+            ctxT.writeAndFlush("成功打开健康检查!\r\n");
             return;
         }
         if (isHC.equals("false")) {
             LoggerFacility.getInstall(null).telHealthCheck = false;
-            ctx.writeAndFlush("成功关闭健康检查!\r\n");
+            ctxT.writeAndFlush("成功关闭健康检查!\r\n");
             return;
         }
     }

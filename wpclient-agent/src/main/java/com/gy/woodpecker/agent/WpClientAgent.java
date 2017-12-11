@@ -18,35 +18,6 @@ public class WpClientAgent {
 
     public static void agentmain(String args, Instrumentation inst) {
         main(args, inst);
-//        Class[] classes = inst.getAllLoadedClasses();
-//        for(Class clazz:classes){
-//
-//            if(clazz.getName().equals("com.letv.sched.service.impl.AppInfoServerImpl")){
-//                System.out.println("???????????????????"+clazz.getName());
-//                SpyTransformer transformer = new SpyTransformer("getLists");
-//                inst.addTransformer(transformer,true);
-//                try {
-//                    inst.retransformClasses(clazz);
-//                } catch (UnmodifiableClassException e) {
-//                    e.printStackTrace();
-//                }finally {
-//                    inst.removeTransformer(transformer);
-//                }
-//            }
-//            if(clazz.getName().equals("com.letv.sched.controller.Tlog")){
-//                System.out.println("???????????????????"+clazz.getName());
-//                SpyTransformer transformer = new SpyTransformer("getT");
-//
-//                inst.addTransformer(transformer,true);
-//                try {
-//                    inst.retransformClasses(clazz);
-//                } catch (UnmodifiableClassException e) {
-//                    e.printStackTrace();
-//                }finally {
-//                    inst.removeTransformer(transformer);
-//                }
-//            }
-      //  }
     }
 
     private static void main(String agentArgs, Instrumentation inst) {
@@ -81,8 +52,39 @@ public class WpClientAgent {
             //初始化 监控端口
             final Class<?> classOfNetty = classLoader.loadClass("com.gy.woodpecker.netty.NettyFactory");
             classOfNetty.getMethod("init").invoke(null);
+
+            // 获取各种Hook
+            final Class<?> adviceWeaverClass = classLoader.loadClass("com.gy.woodpecker.weaver.AdviceWeaver");
+
+            // 初始化全局间谍
+            Spy.initForAgentLauncher(
+                    classLoader,
+                    adviceWeaverClass.getMethod("methodOnBegin",
+                            int.class,
+                            ClassLoader.class,
+                            String.class,
+                            String.class,
+                            String.class,
+                            Object.class,
+                            Object[].class),
+                    adviceWeaverClass.getMethod("methodOnEnd",
+                            int.class,
+                            ClassLoader.class,
+                            String.class,
+                            String.class,
+                            String.class,
+                            Object.class,
+                            Object[].class,
+                            Object.class),
+                    null,
+                    null,
+                    null,
+                    null,
+                    null
+            );
+
         } catch (Exception e) {
-            e.printStackTrace();
+            System.out.println(e.getMessage());
         }
 
     }

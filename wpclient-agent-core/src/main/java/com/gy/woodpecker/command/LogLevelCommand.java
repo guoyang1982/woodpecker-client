@@ -23,15 +23,21 @@ import java.lang.instrument.Instrumentation;
                 "loglevel com.gy.woo.classname warn",
                 "loglevel com.gy.woo.classname error"
         })
-public class LogLevelCommand implements Command{
+public class LogLevelCommand extends AbstractCommand{
     @IndexArg(index = 0, name = "class-pattern",isRequired = false,summary = "类路径名")
     private String classPattern;
     @IndexArg(index = 1, name = "level",isRequired = false,summary = "日志级别")
     private String level;
+
     @Override
-    public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
+    public boolean getIfEnhance() {
+        return false;
+    }
+
+    @Override
+    public void excute(Instrumentation inst) {
         if(StringUtils.isBlank(classPattern) || StringUtils.isBlank(level)){
-            ctx.writeAndFlush("参数错误!\r\n");
+            ctxT.writeAndFlush("参数错误!\r\n");
             return;
         }
         String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
@@ -40,7 +46,7 @@ public class LogLevelCommand implements Command{
         }else if(logerT.equals("logback")) {
             setAppLogbackLevel(classPattern, level,inst);
         }
-        ctx.writeAndFlush("设置日志成功!\r\n");
+        ctxT.writeAndFlush("设置日志成功!\r\n");
     }
 
     private static void setAppLogbackLevel(String className, String level,Instrumentation inst) {

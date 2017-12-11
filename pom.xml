@@ -71,15 +71,26 @@
             <version>1.7.12</version>
         </dependency>
 
-        <dependency>
+        <!-- https://mvnrepository.com/artifact/javassist/javassist -->
+       <!-- <dependency>
             <groupId>javassist</groupId>
             <artifactId>javassist</artifactId>
-            <version>3.3</version>
+            <version>3.12.1.GA</version>
+        </dependency>-->
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.19.0-GA</version>
         </dependency>
         <dependency>
             <groupId>commons-pool</groupId>
             <artifactId>commons-pool</artifactId>
             <version>1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>io.netty</groupId>

@@ -197,40 +197,6 @@ public class LoggerFacility {
         }
     }
 
-
-    public void setT(){
-        Class[] classes = inst.getAllLoadedClasses();
-        for(Class clazz:classes) {
-
-            if (clazz.getName().equals("com.letv.sched.service.impl.AppInfoServerImpl")) {
-                System.out.println("???????????????????" + clazz.getName());
-                SpyTransformer transformer = new SpyTransformer("getLists");
-                inst.addTransformer(transformer, true);
-                try {
-                    inst.retransformClasses(clazz);
-                } catch (UnmodifiableClassException e) {
-                    e.printStackTrace();
-                } finally {
-                    inst.removeTransformer(transformer);
-                }
-            }
-            if (clazz.getName().equals("com.letv.sched.controller.Tlog")) {
-                System.out.println("???????????????????" + clazz.getName());
-                SpyTransformer transformer = new SpyTransformer("getT");
-
-                inst.addTransformer(transformer, true);
-                try {
-                    inst.retransformClasses(clazz);
-                } catch (UnmodifiableClassException e) {
-                    e.printStackTrace();
-                } finally {
-                    inst.removeTransformer(transformer);
-                }
-            }
-        }
-    }
-
-
     public void healthCheck(){
         if(healthCheck.equals("false")){
             return;
