@@ -15,11 +15,14 @@ import io.netty.handler.codec.string.StringDecoder;
 import io.netty.handler.codec.string.StringEncoder;
 import io.netty.handler.logging.LogLevel;
 import io.netty.handler.logging.LoggingHandler;
+import io.netty.handler.timeout.IdleStateHandler;
+import lombok.extern.slf4j.Slf4j;
 
 /**
  * @author guoyang
  * @Description: TODO
  */
+@Slf4j
 public class NettyTelnetServer {
     // 指定端口号
     private static int PORT = 8888;
@@ -28,9 +31,9 @@ public class NettyTelnetServer {
     private EventLoopGroup bossGroup = new NioEventLoopGroup(1);
     private EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    public NettyTelnetServer(){
+    public NettyTelnetServer() {
         String port = ConfigPropertyUtile.getProperties().getProperty("log.netty.server.port");
-        if(null != port && !port.equals("")){
+        if (null != port && !port.equals("")) {
             PORT = Integer.parseInt(port);
         }
     }
@@ -50,6 +53,8 @@ public class NettyTelnetServer {
                                 new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()),
                                 new StringDecoder(), //
                                 new StringEncoder(), //
+                                new IdleStateHandler(0, 0, 300),
+                                new NettyConnetManageHandler(),
                                 new NettyTelnetHandler());
                     }
                 });
@@ -60,7 +65,8 @@ public class NettyTelnetServer {
         // 等待关闭,同步端口
         //ch.closeFuture().sync();
     }
-    public void close(){
+
+    public void close() {
         bossGroup.shutdownGracefully();
         workerGroup.shutdownGracefully();
     }

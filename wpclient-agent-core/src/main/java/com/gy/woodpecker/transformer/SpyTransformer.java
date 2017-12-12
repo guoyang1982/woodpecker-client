@@ -13,10 +13,7 @@ import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.*;
 
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 
@@ -29,6 +26,9 @@ public class SpyTransformer implements ClassFileTransformer {
     // 类-字节码缓存
     private final static Map<Class<?>/*Class*/, byte[]/*bytes of Class*/> classBytesCache
             = new WeakHashMap<Class<?>, byte[]>();
+
+    public final static Map<Integer, List> classNameCache
+            = new HashMap<Integer, List>();
 
     String methodName;
     boolean beforeMethod;
@@ -48,15 +48,25 @@ public class SpyTransformer implements ClassFileTransformer {
                             Class<?> classBeingRedefined, ProtectionDomain protectionDomain,
                             byte[] classfileBuffer) throws IllegalClassFormatException {
 
-        System.out.println("start  startstartstartstartstartstartstartstartstartstartstart");
-
         //每次增强从缓存取 用于多人协助，如果不从缓存取 每次都是从classpath拿最原始字节码
-        byte[] byteCode = classBytesCache.get(classBeingRedefined);
-        if(null == byteCode){
-            byteCode = classfileBuffer;
-        }
+       // byte[] byteCode = classBytesCache.get(classBeingRedefined);
+
+        //if(null == byteCode){
+        byte[] byteCode = classfileBuffer;
+        //}
 
         className = className.replace('/', '.');
+
+        List classNames = classNameCache.get(command.getSessionId());
+        if(null == classNames){
+            classNames = new ArrayList();
+            classNameCache.put(command.getSessionId(),classNames);
+        }
+
+        if(!classNames.contains(classBeingRedefined)){
+            classNames.add(classBeingRedefined);
+        }
+
         if (null == loader) {
             loader = Thread.currentThread().getContextClassLoader();
         }
@@ -100,7 +110,7 @@ public class SpyTransformer implements ClassFileTransformer {
         }
         cc.detach();
 
-        dumpClassIfNecessary(className,byteCode);
+        dumpClassIfNecessary("./woodpecker-class-dump/"+className,byteCode);
 
         return byteCode;
     }
@@ -113,7 +123,7 @@ public class SpyTransformer implements ClassFileTransformer {
 //        if (!GlobalOptions.isDump) {
 //            return;
 //        }
-        final File dumpClassFile = new File("./woodpecker-class-dump/" + className + ".class");
+        final File dumpClassFile = new File( className + ".class");
         final File classPath = new File(dumpClassFile.getParent());
 
         // 创建类所在的包路径
@@ -141,9 +151,6 @@ public class SpyTransformer implements ClassFileTransformer {
         MethodInfo methodInfo = m.getMethodInfo();
         CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
         LocalVariableAttribute attr = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
-        if (attr == null) {
-            // exception
-        }
         Object[] paramNames = new Object[0];
         try {
             paramNames = new String[m.getParameterTypes().length];
@@ -153,10 +160,10 @@ public class SpyTransformer implements ClassFileTransformer {
         int pos = Modifier.isStatic(m.getModifiers()) ? 0 : 1;
         for (int i = 0; i < paramNames.length; i++)
             paramNames[i] = attr.variableName(i + pos);
-        // paramNames即参数名
-        for (int i = 0; i < paramNames.length; i++) {
-            System.out.println(paramNames[i]);
-        }
+//        // paramNames即参数名
+//        for (int i = 0; i < paramNames.length; i++) {
+//            System.out.println(paramNames[i]);
+//        }
 
         StringBuffer params = new StringBuffer();
         params.append("java.util.List spyParamNames = new java.util.ArrayList();");

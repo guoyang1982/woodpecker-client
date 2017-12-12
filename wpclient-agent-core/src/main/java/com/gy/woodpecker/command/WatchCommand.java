@@ -58,9 +58,9 @@ public class WatchCommand extends AbstractCommand{
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);
-                } catch (UnmodifiableClassException e) {
-                    e.printStackTrace();
-                } finally {
+                } catch (Exception e){
+                    log.error("执行异常{}",e);
+                }finally {
                     inst.removeTransformer(transformer);
                 }
             }

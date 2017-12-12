@@ -27,10 +27,11 @@ public class DefaultCommandHandler implements CommandHandler{
                 ctx.writeAndFlush("无此命令!\r\n");
                 return;
             }
+            //保存session id
+            command.setSessionId(sessionId);
             //判断是否需要动态增强
             if(command.getIfEnhance()){
                 //需要增强
-                command.setSessionId(sessionId);
                 command.doAction(ctx,inst);
                // ctx.channel().
                 AdviceWeaver.reg(sessionId,command);
