@@ -24,32 +24,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class NettyTelnetHandler extends SimpleChannelInboundHandler<String> {
     private final CommandHandler commandHandler = new DefaultCommandHandler();
-    // 会话ID序列生成器
-    //private static final AtomicInteger sessionIndexSequence = new AtomicInteger(0);
-    //private AttributeKey<Integer> attributeKey = AttributeKey.valueOf("sessionId");
-//    @Override
-//    public void channelActive(ChannelHandlerContext ctx) throws Exception {
-//        // Send greeting for a new connection.
-//
-//        Attribute<Integer> attribute = ctx.attr(attributeKey);
-//
-//        if(attribute.get() == null) {
-//            attribute.set(sessionIndexSequence.getAndIncrement());
-//        }
-//
-//        ctx.write("欢迎来到啄木鸟控制端!\r\n");
-//        ctx.write("请输入控制命令.\r\n");
-//        ctx.flush();
-//    }
-//
-//    @Override
-//    public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) {
-//        Attribute<Integer> attribute = ctx.attr(attributeKey);
-//        int sessionId = attribute.get();
-//        log.info("连接关闭啦啦啦啦啦啦啦啦啦啦啦啦!"+sessionId);
-//        cause.printStackTrace();
-//        ctx.close();
-//    }
 
     protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 
@@ -63,17 +37,4 @@ public class NettyTelnetHandler extends SimpleChannelInboundHandler<String> {
             commandHandler.executeCommand(request,ctx,LoggerFacility.inst,sessionId);
         }
     }
-//
-//    @Override
-//    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
-//        if (evt instanceof IdleStateEvent) {
-//            IdleStateEvent evnet = (IdleStateEvent) evt;
-//            if (evnet.state().equals(IdleState.ALL_IDLE)) {
-//                Attribute<Integer> attribute = ctx.attr(attributeKey);
-//                int sessionId = attribute.get();
-//                log.info("idle sessionId="+sessionId);
-//            }
-//        }
-//        ctx.fireUserEventTriggered(evt);
-//    }
 }
