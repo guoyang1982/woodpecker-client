@@ -14,7 +14,7 @@ import java.lang.instrument.Instrumentation;
  * @date 2017/12/7 下午1:51
  */
 @Slf4j
-@Cmd(name = "slog", sort = 4, summary = "设置应用是否发送异常消息",
+@Cmd(name = "slog", sort = 4, summary = "Set the application to send an exception message",
         eg = {
                 "slog true"
         })

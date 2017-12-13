@@ -142,6 +142,123 @@ public class GaStringUtils {
 
     }
 
+    /**
+     * 翻译类名称
+     *
+     * @param clazz Java类
+     * @return 翻译值
+     */
+    public static String tranClassName(Class<?> clazz) {
+        return clazz.getCanonicalName();
+    }
+
+
+    /**
+     * 翻译类名称<br/>
+     * 将 java/lang/String 的名称翻译成 java.lang.String
+     *
+     * @param className 类名称 java/lang/String
+     * @return 翻译后名称 java.lang.String
+     */
+    public static String tranClassName(String className) {
+        return StringUtils.replace(className, "/", ".");
+    }
+
+    /**
+     * 自动换行
+     *
+     * @param string 字符串
+     * @param width  行宽
+     * @return 换行后的字符串
+     */
+    public static String wrap(String string, int width) {
+        final StringBuilder sb = new StringBuilder();
+        final char[] buffer = string.toCharArray();
+        int count = 0;
+        for (char c : buffer) {
+
+            if (count == width) {
+                count = 0;
+                sb.append('\n');
+                if (c == '\n') {
+                    continue;
+                }
+            }
+
+            if (c == '\n') {
+                count = 0;
+            } else {
+                count++;
+            }
+
+            sb.append(c);
+
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 翻译Modifier值
+     *
+     * @param mod modifier
+     * @return 翻译值
+     */
+    public static String tranModifier(int mod) {
+        StringBuilder sb = new StringBuilder();
+        if (Modifier.isAbstract(mod)) {
+            sb.append("abstract,");
+        }
+        if (Modifier.isFinal(mod)) {
+            sb.append("final,");
+        }
+        if (Modifier.isInterface(mod)) {
+            sb.append("interface,");
+        }
+        if (Modifier.isNative(mod)) {
+            sb.append("native,");
+        }
+        if (Modifier.isPrivate(mod)) {
+            sb.append("private,");
+        }
+        if (Modifier.isProtected(mod)) {
+            sb.append("protected,");
+        }
+        if (Modifier.isPublic(mod)) {
+            sb.append("public,");
+        }
+        if (Modifier.isStatic(mod)) {
+            sb.append("static,");
+        }
+        if (Modifier.isStrict(mod)) {
+            sb.append("strict,");
+        }
+        if (Modifier.isSynchronized(mod)) {
+            sb.append("synchronized,");
+        }
+        if (Modifier.isTransient(mod)) {
+            sb.append("transient,");
+        }
+        if (Modifier.isVolatile(mod)) {
+            sb.append("volatile,");
+        }
+        if (sb.length() > 0) {
+            sb.deleteCharAt(sb.length() - 1);
+        }
+        return sb.toString();
+    }
+
+    /**
+     * 将一个对象转换为字符串
+     *
+     * @param obj 目标对象
+     * @return 字符串
+     */
+    public static String newString(Object obj) {
+        if (null == obj) {
+            return EMPTY;
+        }
+        return obj.toString();
+    }
 
 }
 

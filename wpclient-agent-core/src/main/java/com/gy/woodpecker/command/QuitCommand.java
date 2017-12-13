@@ -14,7 +14,7 @@ import java.lang.instrument.Instrumentation;
  * @date 2017/12/7 下午3:21
  */
 @Slf4j
-@Cmd(name = "quit", sort = 6, summary = "退出客户端命令",
+@Cmd(name = "quit", sort = 6, summary = "Exit the client command",
         eg = {
                 "quit"
         })

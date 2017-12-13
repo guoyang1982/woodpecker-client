@@ -14,7 +14,7 @@ import java.lang.instrument.Instrumentation;
  * @date 2017/12/7 下午3:05
  */
 @Slf4j
-@Cmd(name = "hc", sort = 1, summary = "设置健康检查开关",
+@Cmd(name = "hc", sort = 1, summary = "Setting up the redis health check",
         eg = {
                 "hc true",
                 "hc false"

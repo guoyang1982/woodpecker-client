@@ -17,7 +17,7 @@ import java.util.List;
  * @date 2017/12/7 下午1:48
  */
 @Slf4j
-@Cmd(name = "loginfo", sort = 2, summary = "获取应用配置日志的类，为设置日志级别服务",
+@Cmd(name = "loginfo", sort = 2, summary = "Get the class of the application configuration log to set up the log level service",
         eg = {
                 "loginfo com.gy",
                 "loginfo"

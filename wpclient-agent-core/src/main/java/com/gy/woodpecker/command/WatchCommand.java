@@ -4,6 +4,8 @@ import com.alibaba.fastjson.JSON;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
+import com.gy.woodpecker.textui.TKv;
+import com.gy.woodpecker.textui.TTable;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -20,8 +22,8 @@ import java.lang.instrument.UnmodifiableClassException;
 @Slf4j
 @Cmd(name = "watch", sort = 8, summary = "Display the details of specified class and method",
         eg = {
-                "watch -p org.apache.commons.lang.StringUtils isBlank 返回参数信息",
-                "watch -r org.apache.commons.lang.StringUtils isBlank 返回结果信息",
+                "watch -p org.apache.commons.lang.StringUtils isBlank",
+                "watch -r org.apache.commons.lang.StringUtils isBlank",
         })
 public class WatchCommand extends AbstractCommand{
 
@@ -68,22 +70,47 @@ public class WatchCommand extends AbstractCommand{
     }
 
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
-        StringBuffer result = new StringBuffer();
-        result.append("className:"+className+"\r\n");
-        result.append("methodName:"+methodName+"\r\n");
-        //result.append("return:"+JSON.toJSONString(target)+"\r\n");
-        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
-        ctxT.writeAndFlush(result.toString());
+//        StringBuffer result = new StringBuffer();
+//        result.append("className:"+className+"\r\n");
+//        result.append("methodName:"+methodName+"\r\n");
+//        //result.append("return:"+JSON.toJSONString(target)+"\r\n");
+//        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
+
+        final TKv tKv = new TKv(
+                new TTable.ColumnDefine(TTable.Align.RIGHT),
+                new TTable.ColumnDefine(TTable.Align.LEFT));
+        tKv.add("className",className);
+        tKv.add("methodName","methodName");
+        tKv.add("patameter",JSON.toJSONString(args));
+
+        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                new TTable.ColumnDefine()
+        });
+
+        tTable.addRow(tKv.rendering());
+        ctxT.writeAndFlush(tTable.rendering());
     }
 
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
-        StringBuffer result = new StringBuffer();
-        result.append("className:"+className+"\r\n");
-        result.append("methodName:"+methodName+"\r\n");
-        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
-        result.append("return:"+JSON.toJSONString(returnObject)+"\r\n");
-        ctxT.writeAndFlush(result.toString());
+//        StringBuffer result = new StringBuffer();
+//        result.append("className:"+className+"\r\n");
+//        result.append("methodName:"+methodName+"\r\n");
+//        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
+//        result.append("return:"+JSON.toJSONString(returnObject)+"\r\n");
+        final TKv tKv = new TKv(
+                new TTable.ColumnDefine(TTable.Align.RIGHT),
+                new TTable.ColumnDefine(TTable.Align.LEFT));
+        tKv.add("className",className);
+        tKv.add("methodName","methodName");
+        tKv.add("patameter",JSON.toJSONString(args));
+        tKv.add("return",JSON.toJSONString(returnObject));
 
+        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                new TTable.ColumnDefine()
+        });
+
+        tTable.addRow(tKv.rendering());
+        ctxT.writeAndFlush(tTable.rendering());
     }
 }

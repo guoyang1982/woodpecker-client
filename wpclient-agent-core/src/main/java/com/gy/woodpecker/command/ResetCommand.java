@@ -20,13 +20,13 @@ import static java.lang.System.arraycopy;
  * @date 2017/12/12 上午10:06
  */
 @Slf4j
-@Cmd(name = "reset", sort = 9, summary = "恢复增强的类",
+@Cmd(name = "reset", sort = 9, summary = "Restore the enhanced class",
         eg = {
-                "reset 恢复自己增强的类",
-                "reset -a 恢复所有终端增强的类"
+                "reset",
+                "reset -a"
         })
 public class ResetCommand extends AbstractCommand {
-    @NamedArg(name = "a", summary = "需要恢复所有的类")
+    @NamedArg(name = "a", summary = "是否需要恢复所有的类")
     private boolean isAllClass = false;
 
     @Override

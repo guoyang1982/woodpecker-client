@@ -15,7 +15,7 @@ import java.lang.instrument.Instrumentation;
  * @date 2017/12/7 下午1:56
  */
 @Slf4j
-@Cmd(name = "loglevel", sort = 3, summary = "设置应用类的日志级别",
+@Cmd(name = "loglevel", sort = 3, summary = "Setting the log level of the application class",
         eg = {
                 "loglevel com.gy.woo.classname debug",
                 "loglevel root debug",
