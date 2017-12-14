@@ -20,7 +20,7 @@ import java.lang.instrument.UnmodifiableClassException;
  * @date 2017/12/7 下午6:26
  */
 @Slf4j
-@Cmd(name = "watch", sort = 8, summary = "Display the details of specified class and method",
+@Cmd(name = "watch", sort = 8, summary = "The method parameters and return values of the display class",
         eg = {
                 "watch -p org.apache.commons.lang.StringUtils isBlank",
                 "watch -r org.apache.commons.lang.StringUtils isBlank",

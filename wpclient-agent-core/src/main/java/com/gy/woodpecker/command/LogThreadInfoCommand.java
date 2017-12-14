@@ -26,7 +26,7 @@ public class LogThreadInfoCommand extends AbstractCommand {
 
     @Override
     public void excute(Instrumentation inst) {
-       String threadInfo = LoggerFacility.threadPoolsMonitor()+"\r\n";
+       String threadInfo = LoggerFacility.threadPoolsMonitor()+"\n";
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                 new TTable.ColumnDefine()
         });

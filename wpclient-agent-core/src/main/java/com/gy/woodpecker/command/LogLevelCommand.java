@@ -37,7 +37,7 @@ public class LogLevelCommand extends AbstractCommand{
     @Override
     public void excute(Instrumentation inst) {
         if(StringUtils.isBlank(classPattern) || StringUtils.isBlank(level)){
-            ctxT.writeAndFlush("参数错误!\r\n");
+            ctxT.writeAndFlush("参数错误!\n");
             return;
         }
         String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
@@ -46,7 +46,7 @@ public class LogLevelCommand extends AbstractCommand{
         }else if(logerT.equals("logback")) {
             setAppLogbackLevel(classPattern, level,inst);
         }
-        ctxT.writeAndFlush("设置日志成功!\r\n");
+        ctxT.writeAndFlush("设置日志成功!\n");
     }
 
     private static void setAppLogbackLevel(String className, String level,Instrumentation inst) {

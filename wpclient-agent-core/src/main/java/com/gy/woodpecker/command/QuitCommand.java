@@ -26,7 +26,7 @@ public class QuitCommand extends AbstractCommand {
 
     @Override
     public void excute(Instrumentation inst) {
-        ChannelFuture future = ctxT.writeAndFlush("Bye!\r\n");
+        ChannelFuture future = ctxT.writeAndFlush("Bye!\n");
         future.addListener(ChannelFutureListener.CLOSE);
 
     }

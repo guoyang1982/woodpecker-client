@@ -3,6 +3,7 @@ package com.gy.woodpecker.netty;
 import com.gy.woodpecker.command.ResetCommand;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.session.SessionManager;
+import com.gy.woodpecker.tools.GaStringUtils;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
@@ -21,6 +22,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  */
 @Slf4j
 public class NettyConnetManageHandler  extends ChannelDuplexHandler {
+    private static final byte[] EOT = "".getBytes();
 
     @Override
     public void channelRegistered(ChannelHandlerContext ctx) throws Exception {
@@ -40,8 +42,11 @@ public class NettyConnetManageHandler  extends ChannelDuplexHandler {
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         //创建会话
         SessionManager.newSession(ctx);
-        ctx.write("欢迎来到啄木鸟控制端!\r\n");
-        ctx.write("请输入控制命令.\r\n");
+        //ctx.write("欢迎来到啄木鸟控制端!\n");
+        ctx.write(GaStringUtils.getLogo()+"\n");
+        ctx.flush();
+
+        ctx.write("请输入控制命令.\n\0");
         ctx.flush();
     }
 
@@ -50,6 +55,8 @@ public class NettyConnetManageHandler  extends ChannelDuplexHandler {
     public void channelInactive(ChannelHandlerContext ctx) throws Exception {
         log.info("客户端关闭,准备清理增强的代码!");
         ResetCommand resetCommand = new ResetCommand();
+        resetCommand.setCtxT(ctx);
+        resetCommand.setSessionId(SessionManager.getSessionId(ctx));
         resetCommand.excute(LoggerFacility.inst);
         super.channelInactive(ctx);
     }

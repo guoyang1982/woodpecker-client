@@ -3,6 +3,9 @@ package com.gy.woodpecker.handler;
 import com.gy.woodpecker.Exception.CommandException;
 import com.gy.woodpecker.command.Command;
 import com.gy.woodpecker.command.Commands;
+import com.gy.woodpecker.command.ResetCommand;
+import com.gy.woodpecker.log.LoggerFacility;
+import com.gy.woodpecker.session.SessionManager;
 import com.gy.woodpecker.weaver.AdviceWeaver;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -22,9 +25,18 @@ public class DefaultCommandHandler implements CommandHandler{
     public void executeCommand(String line, ChannelHandlerContext ctx,Instrumentation inst,int sessionId) throws IOException {
 
         try {
+            if(line.equals("kill")){
+                //清理增强的类
+                ResetCommand resetCommand = new ResetCommand();
+                resetCommand.setCtxT(ctx);
+                resetCommand.setSessionId(SessionManager.getSessionId(ctx));
+                resetCommand.excute(inst);
+                ctx.writeAndFlush("\n\0");
+                return;
+            }
             Command command = Commands.getInstance().newCommand(line);
             if(null == command){
-                ctx.writeAndFlush("无此命令!\r\n");
+                ctx.writeAndFlush("无此命令!\n\0");
                 return;
             }
             //保存session id

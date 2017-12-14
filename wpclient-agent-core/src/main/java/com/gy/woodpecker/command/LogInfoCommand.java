@@ -64,10 +64,10 @@ public class LogInfoCommand extends AbstractCommand{
                         String logName = (String)classOfLogger.getMethod("getName").invoke(loggerObj);
                         if(StringUtils.isNotBlank(filterLog) ){
                             if(logName.startsWith(filterLog)){
-                                strLog.append(logName).append("\r\n");
+                                strLog.append(logName).append("\n");
                             }
                         }else{
-                            strLog.append(logName).append("\r\n");
+                            strLog.append(logName).append("\n");
                         }
                     }
 
@@ -99,10 +99,10 @@ public class LogInfoCommand extends AbstractCommand{
                         String logName = (String)classOfLogger.getMethod("getName").invoke(objectOfLog);
                         if(StringUtils.isNotBlank(filterLog) ){
                             if(logName.startsWith(filterLog)){
-                                strLog.append(logName).append("\r\n");
+                                strLog.append(logName).append("\n");
                             }
                         }else{
-                            strLog.append(logName).append("\r\n");
+                            strLog.append(logName).append("\n");
                         }
                     }
                 }catch (Exception e){

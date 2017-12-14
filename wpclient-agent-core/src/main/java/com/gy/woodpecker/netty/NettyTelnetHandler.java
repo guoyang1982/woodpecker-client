@@ -4,6 +4,7 @@ import com.gy.woodpecker.handler.CommandHandler;
 import com.gy.woodpecker.handler.DefaultCommandHandler;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.session.SessionManager;
+import com.gy.woodpecker.tools.GaStringUtils;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.channel.ChannelHandlerContext;
@@ -24,13 +25,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 public class NettyTelnetHandler extends SimpleChannelInboundHandler<String> {
     private final CommandHandler commandHandler = new DefaultCommandHandler();
+    private static final byte[] EOT = "".getBytes();
 
     protected void channelRead0(ChannelHandlerContext ctx, String request) throws Exception {
 
         String response;
         boolean close = false;
         if (request.isEmpty()) {
-            response = "请输入命令.\r\n";
+            response = "请输入命令.\n\0";
             ctx.writeAndFlush(response);
         }else {
             int sessionId = SessionManager.getSessionId(ctx);

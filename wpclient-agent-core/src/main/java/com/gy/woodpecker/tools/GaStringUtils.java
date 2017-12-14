@@ -1,5 +1,6 @@
 package com.gy.woodpecker.tools;
 
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
@@ -18,7 +19,7 @@ public class GaStringUtils {
     /**
      * 命令提示符
      */
-    public static final String DEFAULT_PROMPT = "ga?>";
+    public static final String DEFAULT_PROMPT = "wp>";
 
     /**
      * 中断提示
@@ -258,6 +259,11 @@ public class GaStringUtils {
             return EMPTY;
         }
         return obj.toString();
+    }
+
+    public static String getLogo() throws IOException {
+        final String logo = IOUtils.toString(GaStringUtils.class.getResourceAsStream("/logo.txt"));
+        return logo;
     }
 
 }

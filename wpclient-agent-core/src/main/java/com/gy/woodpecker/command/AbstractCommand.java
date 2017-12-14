@@ -15,6 +15,10 @@ public abstract class AbstractCommand implements Command{
     ChannelHandlerContext ctxT;
     int sessionId;
 
+    public void setCtxT(ChannelHandlerContext ctxT) {
+        this.ctxT = ctxT;
+    }
+
     @Override
     public boolean getIfEnhance() {
         return false;
@@ -45,6 +49,12 @@ public abstract class AbstractCommand implements Command{
     public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
         this.ctxT = ctx;
         this.excute(inst);
+        if(!this.getIfEnhance()){
+            ctxT.writeAndFlush("\0");
+        }else {
+            //类增强 并 等待结果
+            ctxT.writeAndFlush("Press Ctrl+D to abort.\n");
+        }
     }
 
     public abstract void excute(Instrumentation inst);

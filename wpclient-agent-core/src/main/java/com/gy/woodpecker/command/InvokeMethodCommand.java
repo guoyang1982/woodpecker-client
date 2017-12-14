@@ -48,25 +48,6 @@ public class InvokeMethodCommand extends AbstractCommand {
 //
 //                        final Object reObj = clazz.getMethod(methodPattern).invoke(objectOfCommand);
 
-                        //适合spring b/s框架
-//                        final Class<?> classOfRequestContextHolder = appClassLoader.loadClass("org.springframework.web.context.request.RequestContextHolder");
-//                        final Object objectOfServletRequestAttributes = classOfRequestContextHolder.getMethod("getRequestAttributes").invoke(null);
-//                        final Class<?> classOfServletRequestAttributes = appClassLoader.loadClass("org.springframework.web.context.request.ServletRequestAttributes");
-//                        final Object objectOfHttpServletRequest = classOfServletRequestAttributes.getMethod("getRequest").invoke(objectOfServletRequestAttributes);
-//                        final Class<?> classOfHttpServletRequest = appClassLoader.loadClass("javax.servlet.http.HttpServletRequest");
-//
-//                        final Object objectOfHttpSession = classOfHttpServletRequest.getMethod("getSession").invoke(null);
-//                        final Class<?> classOfHttpSession = appClassLoader.loadClass("javax.servlet.http.HttpSession");
-//                        final Object objectOfServletContext = classOfHttpSession.getMethod("getServletContext").invoke(objectOfHttpSession);
-//                        final Class<?> classOfServletContext = appClassLoader.loadClass("javax.servlet.ServletContext");
-//
-//
-//                        final Class<?> classOfWebApplicationContextUtils = appClassLoader.loadClass("org.springframework.web.context.support.WebApplicationContextUtils");
-//                        final Object objectOfApplicationContext = classOfWebApplicationContextUtils.getMethod("getWebApplicationContext").invoke(objectOfServletContext);
-//                        final Class<?> classOfApplicationContext = appClassLoader.loadClass("org.springframework.context.ApplicationContext");
-//
-//                        final Object webObjectOfCommand = classOfApplicationContext.getMethod("getBean").invoke(objectOfApplicationContext,classPattern);
-//                        final Object reObj = clazz.getMethod(methodPattern).invoke(webObjectOfCommand);
 
                        // ctxT.writeAndFlush(JSON.toJSONString(reObj)+"\r\n");
 
@@ -89,12 +70,12 @@ public class InvokeMethodCommand extends AbstractCommand {
                 if (Modifier.isStatic(method.getModifiers())) {
                     //静态方法
                     Object reObj = method.invoke(null);
-                    ctxT.writeAndFlush(JSON.toJSONString(reObj)+"\r\n");
+                    ctxT.writeAndFlush(JSON.toJSONString(reObj)+"\n");
                 } else {
                     //非静态方法
                     Object obj = classOfCommand.newInstance();
                     Object reObj = method.invoke(obj);
-                    ctxT.writeAndFlush(JSON.toJSONString(reObj)+"\r\n");
+                    ctxT.writeAndFlush(JSON.toJSONString(reObj)+"\n");
                 }
             } catch (Exception e) {
                 log.error("invoke method fail!", e);

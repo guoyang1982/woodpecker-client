@@ -32,14 +32,14 @@ public class LogSendMgeCommand extends AbstractCommand {
 
         if (isSend.equals("true")) {
             LoggerFacility.f = true;
-            ctxT.writeAndFlush("成功打开日志监控!\r\n");
+            ctxT.writeAndFlush("成功打开日志监控!\n");
             return;
         }
         if (isSend.equals("false")) {
             LoggerFacility.getInstall(null).f = false;
-            ctxT.writeAndFlush("成功关闭日志监控!\r\n");
+            ctxT.writeAndFlush("成功关闭日志监控!\n");
             return;
         }
-        ctxT.writeAndFlush("参数错误!\r\n");
+        ctxT.writeAndFlush("参数错误!\n");
     }
 }

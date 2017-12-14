@@ -32,12 +32,12 @@ public class HealthCheckCommand extends AbstractCommand {
     public void excute(Instrumentation inst) {
         if (isHC.equals("true")) {
             LoggerFacility.getInstall(null).telHealthCheck = true;
-            ctxT.writeAndFlush("成功打开健康检查!\r\n");
+            ctxT.writeAndFlush("成功打开健康检查!\n");
             return;
         }
         if (isHC.equals("false")) {
             LoggerFacility.getInstall(null).telHealthCheck = false;
-            ctxT.writeAndFlush("成功关闭健康检查!\r\n");
+            ctxT.writeAndFlush("成功关闭健康检查!\n");
             return;
         }
     }
