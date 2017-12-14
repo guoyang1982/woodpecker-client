@@ -20,7 +20,7 @@ import java.util.Collections;
  * @Description: 查看线程占用cpu资源命令
  * @date 2017/12/14 下午4:02
  */
-@Cmd(name = "top", sort = 13, summary = "Display The Threads Of Top CPU TIME",
+@Cmd(name = "top", sort = 12, summary = "Display The Threads Of Top CPU TIME",
         eg = {
                 "top",
                 "top -t 5",

@@ -1,6 +1,7 @@
 package com.gy.woodpecker.transformer;
 
 import com.gy.woodpecker.command.Command;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.weaver.AdviceWeaver;
 import javassist.*;
 import javassist.bytecode.CodeAttribute;
@@ -109,9 +110,9 @@ public class SpyTransformer implements ClassFileTransformer {
             }
         }
         cc.detach();
-
-        dumpClassIfNecessary("./woodpecker-class-dump/"+className,byteCode);
-
+        if(ContextConfig.isdumpClass){
+            dumpClassIfNecessary("./woodpecker-class-dump/"+className,byteCode);
+        }
         return byteCode;
     }
 

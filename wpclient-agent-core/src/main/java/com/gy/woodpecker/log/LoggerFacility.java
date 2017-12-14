@@ -190,34 +190,4 @@ public class LoggerFacility {
            }
         }
     }
-
-//    public void healthCheck(){
-//        if(healthCheck.equals("false")){
-//            return;
-//        }
-//        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-//        long delay = healthCheckDelay;
-//        long initDelay = 0;
-//        executor.scheduleAtFixedRate(
-//                new Runnable() {
-//                    public void run() {
-//                        if(!telHealthCheck){
-//                            return;
-//                        }
-//                        log.info("执行redis健康检查!");
-//                        try{
-//                            if(null != redisClient){
-//                                redisClient.set(appName+"-ping","1",1);
-//                            }
-//                            f = true;
-//                        }catch (Exception e){
-//                            log.info("redis健康检查异常,{}",e);
-//                            f = false;
-//                        }
-//                    }
-//                },
-//                initDelay,
-//                delay,
-//                TimeUnit.MILLISECONDS);
-//    }
 }
