@@ -3,6 +3,7 @@ package com.gy.woodpecker.command;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.log.LoggerFacility;
+import com.gy.woodpecker.redis.RedisClient;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 
@@ -31,12 +32,12 @@ public class HealthCheckCommand extends AbstractCommand {
     @Override
     public void excute(Instrumentation inst) {
         if (isHC.equals("true")) {
-            LoggerFacility.getInstall(null).telHealthCheck = true;
+            RedisClient.RedisClientInstance.telHealthCheck = true;
             ctxT.writeAndFlush("成功打开健康检查!\n");
             return;
         }
         if (isHC.equals("false")) {
-            LoggerFacility.getInstall(null).telHealthCheck = false;
+            RedisClient.RedisClientInstance.telHealthCheck = false;
             ctxT.writeAndFlush("成功关闭健康检查!\n");
             return;
         }

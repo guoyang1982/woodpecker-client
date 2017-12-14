@@ -39,10 +39,6 @@ public class LoggerFacility {
 
     private volatile String healthCheck = "true";
 
-    public volatile boolean telHealthCheck = true;
-
-    private int healthCheckDelay = 10000;
-
     public static volatile boolean f = true;
 
     private static int corePoolSize = 4;
@@ -97,10 +93,7 @@ public class LoggerFacility {
         if(null != healthCheckT && !healthCheckT.equals("")){
             this.healthCheck = healthCheckT;
         }
-        String delay = ConfigPropertyUtile.getProperties().getProperty("redis.health.check.delay");
-        if(null != delay && !delay.equals("")){
-            this.healthCheckDelay = Integer.parseInt(delay);
-        }
+
         String corePoolSizeT = ConfigPropertyUtile.getProperties().getProperty("log.thread.corePoolSize");
         if(null != corePoolSizeT && !corePoolSizeT.equals("")){
             this.corePoolSize = Integer.parseInt(corePoolSizeT);
@@ -118,11 +111,12 @@ public class LoggerFacility {
             this.queueCount = Integer.parseInt(queueCountT);
         }
 
-        //初始化 redis
-        redisClient = new RedisClient();
-        redisClient.init();
+        //启动redis
+        RedisClient.RedisClientInstance.init();
         //启动健康检查
-        healthCheck();
+        if (!healthCheck.equals("false")) {
+            RedisClient.RedisClientInstance.healthCheck(appName);
+        }
         //处理要插桩的类
         inst.addTransformer(new WoodpeckTransformer());
     }
@@ -171,7 +165,7 @@ public class LoggerFacility {
                     messageBean.setMsg(msg);
                     messageBean.setCreateTime(timeForNow());
 
-                    redisClient.rightPush(appName, JSONObject.toJSONString(messageBean));
+                    RedisClient.RedisClientInstance.rightPush(appName, JSONObject.toJSONString(messageBean));
                 } catch (Exception e) {
                     log.info("发送异常日志消息失败!"+e.getMessage());
                 }
@@ -197,33 +191,33 @@ public class LoggerFacility {
         }
     }
 
-    public void healthCheck(){
-        if(healthCheck.equals("false")){
-            return;
-        }
-        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
-        long delay = healthCheckDelay;
-        long initDelay = 0;
-        executor.scheduleAtFixedRate(
-                new Runnable() {
-                    public void run() {
-                        if(!telHealthCheck){
-                            return;
-                        }
-                        log.info("执行redis健康检查!");
-                        try{
-                            if(null != redisClient){
-                                redisClient.set(appName+"-ping","1",1);
-                            }
-                            f = true;
-                        }catch (Exception e){
-                            log.info("redis健康检查异常,{}",e);
-                            f = false;
-                        }
-                    }
-                },
-                initDelay,
-                delay,
-                TimeUnit.MILLISECONDS);
-    }
+//    public void healthCheck(){
+//        if(healthCheck.equals("false")){
+//            return;
+//        }
+//        ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
+//        long delay = healthCheckDelay;
+//        long initDelay = 0;
+//        executor.scheduleAtFixedRate(
+//                new Runnable() {
+//                    public void run() {
+//                        if(!telHealthCheck){
+//                            return;
+//                        }
+//                        log.info("执行redis健康检查!");
+//                        try{
+//                            if(null != redisClient){
+//                                redisClient.set(appName+"-ping","1",1);
+//                            }
+//                            f = true;
+//                        }catch (Exception e){
+//                            log.info("redis健康检查异常,{}",e);
+//                            f = false;
+//                        }
+//                    }
+//                },
+//                initDelay,
+//                delay,
+//                TimeUnit.MILLISECONDS);
+//    }
 }
