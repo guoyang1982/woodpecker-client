@@ -2,15 +2,11 @@ package com.gy.woodpecker.transformer;
 
 import com.gy.woodpecker.command.Command;
 import com.gy.woodpecker.config.ContextConfig;
-import com.gy.woodpecker.enumeration.ClassTypeEnum;
 import com.gy.woodpecker.enumeration.CommandEnum;
-import com.gy.woodpecker.weaver.AdviceWeaver;
 import javassist.*;
-import javassist.bytecode.CodeAttribute;
-import javassist.bytecode.LocalVariableAttribute;
+
 import javassist.bytecode.MethodInfo;
 import javassist.expr.ExprEditor;
-import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
 import lombok.extern.slf4j.Slf4j;
@@ -128,9 +124,7 @@ public class SpyTransformer implements ClassFileTransformer {
     * dump class to file
     */
     private static void dumpClassIfNecessary(String className, byte[] data) {
-//        if (!GlobalOptions.isDump) {
-//            return;
-//        }
+
         final File dumpClassFile = new File(className + ".class");
         final File classPath = new File(dumpClassFile.getParent());
 
@@ -196,7 +190,6 @@ public class SpyTransformer implements ClassFileTransformer {
             });
         }
 
-        //目前只支持object 原子类型需要转换下
         if(command.getCommandType().equals(CommandEnum.PRINT)){
             String objPrintValue = command.getValue();
             String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\","+objPrintValue+");";
@@ -207,7 +200,6 @@ public class SpyTransformer implements ClassFileTransformer {
 
         if (beforeMethod) {
             beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
-            //m.insertBefore(params.toString() + beforeBody.toString());
             m.insertBefore(beforeBody.toString());
         }
 
@@ -215,7 +207,6 @@ public class SpyTransformer implements ClassFileTransformer {
 
         if (afterMethod) {
             afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
-           // m.insertAfter(params.toString() + afterBody.toString());
             m.insertAfter(afterBody.toString());
         }
 //        if(throwMethod){

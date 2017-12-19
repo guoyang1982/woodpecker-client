@@ -40,6 +40,8 @@ public class LoggerFacility {
     private volatile String healthCheck = "true";
 
     public static volatile boolean f = true;
+    //客户端关闭发送日志命令
+    public static volatile boolean slog = true;
 
     private static int corePoolSize = 4;
     private static int maximumPoolSize = 4;
@@ -148,6 +150,10 @@ public class LoggerFacility {
     public void sendToRedis(final String msg) {
         log.info("发送异常日志消息!"+msg);
 
+        if(!slog){
+            log.info("客户端关闭了发送日志, 不处理操作!");
+            return;
+        }
         if (!f) {
             log.info("redis集群不健康, 不处理操作!");
             return;

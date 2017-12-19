@@ -31,12 +31,12 @@ public class LogSendMgeCommand extends AbstractCommand {
     public boolean excute(Instrumentation inst) {
 
         if (isSend.equals("true")) {
-            LoggerFacility.f = true;
+            LoggerFacility.slog = true;
             ctxT.writeAndFlush("成功打开日志监控!\n");
             return true;
         }
         if (isSend.equals("false")) {
-            LoggerFacility.getInstall(null).f = false;
+            LoggerFacility.getInstall(null).slog = false;
             ctxT.writeAndFlush("成功关闭日志监控!\n");
             return true;
         }
