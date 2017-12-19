@@ -77,12 +77,34 @@ public class WpClientAgent {
                             Object[].class,
                             Object.class),
                     null,
+                    adviceWeaverClass.getMethod("methodOnInvokeBeforeTracing",
+                            int.class,
+                            int.class,
+                            String.class,
+                            String.class,
+                            String.class),
+                    adviceWeaverClass.getMethod("methodOnInvokeAfterTracing",
+                            int.class,
+                            int.class,
+                            String.class,
+                            String.class,
+                            String.class),
+                    adviceWeaverClass.getMethod("methodOnInvokeThrowTracing",
+                            int.class,
+                            int.class,
+                            String.class,
+                            String.class,
+                            String.class,
+                            Object.class),
                     null,
-                    null,
-                    null,
-                    null
+                    adviceWeaverClass.getMethod("printMethod",
+                            int.class,
+                            ClassLoader.class,
+                            String.class,
+                            String.class,
+                            Object.class
+                            )
             );
-
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }

@@ -51,7 +51,7 @@ public class ThreadTopCommand extends AbstractCommand{
                 return tKv.rendering();
         }
         @Override
-        public void excute(Instrumentation inst) {
+        public boolean excute(Instrumentation inst) {
                 final ArrayList<ThreadInfoData> threadInfoDatas = new ArrayList<ThreadInfoData>();
 
                 long totalCpuTime = threadMXBean.getCurrentThreadCpuTime();
@@ -109,6 +109,7 @@ public class ThreadTopCommand extends AbstractCommand{
                 ctxT.writeAndFlush(tTable.rendering());
 
                 //printer.println(tTable.rendering()).finish();
+                return true;
         }
 
         private class ThreadInfoData implements Comparable<ThreadInfoData> {

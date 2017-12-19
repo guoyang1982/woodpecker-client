@@ -1,5 +1,8 @@
 package com.gy.woodpecker.command;
 
+import com.gy.woodpecker.command.annotation.IndexArg;
+import com.gy.woodpecker.enumeration.ClassTypeEnum;
+import com.gy.woodpecker.enumeration.CommandEnum;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.lang.StringUtils;
@@ -14,14 +17,23 @@ import java.lang.instrument.Instrumentation;
 public abstract class AbstractCommand implements Command{
     ChannelHandlerContext ctxT;
     int sessionId;
+    boolean res = true;
 
     public void setCtxT(ChannelHandlerContext ctxT) {
         this.ctxT = ctxT;
+    }
+    public ChannelHandlerContext getCtxT() {
+        return ctxT;
     }
 
     @Override
     public boolean getIfEnhance() {
         return false;
+    }
+
+    @Override
+    public CommandEnum getCommandType(){
+        return CommandEnum.OTHER;
     }
 
     @Override
@@ -38,6 +50,22 @@ public abstract class AbstractCommand implements Command{
                       Object returnObject) throws Throwable {
     }
 
+    @Override
+    public void invokeBeforeTracing(int lineNumber, String owner, String name, String desc){
+    }
+
+    @Override
+    public void invokeAfterTracing(int lineNumber, String owner, String name, String desc){
+    }
+    @Override
+    public void invokePrint(ClassLoader loader, String className, String methodName,
+                     Object printTarget){
+    }
+    @Override
+    public void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException){
+    }
+
+
     public void setSessionId(int sessionId){
         this.sessionId = sessionId;
     }
@@ -46,9 +74,28 @@ public abstract class AbstractCommand implements Command{
         return sessionId;
     }
 
+    public String getValue(){
+        return "";
+    }
+    public String getLineNumber(){
+        return "";
+    }
+
+    public boolean getRes(){return res;};
+
+    public void setRes(boolean res){
+        this.res = res;
+    }
+
+
     public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
         this.ctxT = ctx;
-        this.excute(inst);
+        boolean re = this.excute(inst);
+        if(!re){
+            ctxT.writeAndFlush("excute fail!\n");
+            ctxT.writeAndFlush("\0");
+            return;
+        }
         if(!this.getIfEnhance()){
             ctxT.writeAndFlush("\0");
         }else {
@@ -57,5 +104,5 @@ public abstract class AbstractCommand implements Command{
         }
     }
 
-    public abstract void excute(Instrumentation inst);
+    public abstract boolean excute(Instrumentation inst);
 }

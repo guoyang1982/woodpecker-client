@@ -1,5 +1,7 @@
 package com.gy.woodpecker.command;
 
+import com.gy.woodpecker.enumeration.ClassTypeEnum;
+import com.gy.woodpecker.enumeration.CommandEnum;
 import io.netty.channel.ChannelHandlerContext;
 
 import java.lang.instrument.Instrumentation;
@@ -11,6 +13,18 @@ public interface Command {
      * @return
      */
     public boolean getIfEnhance();
+
+    /**
+     * 获取上下文信息
+     * @return
+     */
+    public ChannelHandlerContext getCtxT();
+
+    /**
+     * 命令类型
+     * @return
+     */
+    public CommandEnum getCommandType();
 
     /**
      * 获取是否全部广播
@@ -45,7 +59,24 @@ public interface Command {
     void after(ClassLoader loader, String className, String methodName, String methodDesc,
                               Object target, Object[] args,Object returnObject) throws Throwable;
 
+    void invokeBeforeTracing(int lineNumber, String owner, String name, String desc);
+
+    void invokeAfterTracing(int lineNumber, String owner, String name, String desc);
+
+    void invokePrint(ClassLoader loader, String className, String methodName,
+                Object printTarget);
+
+    void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException);
+
     public void setSessionId(int sessionId);
 
     public int getSessionId();
+
+    public String getValue();
+
+    public String getLineNumber();
+
+    public boolean getRes();
+
+    public void setRes(boolean res);
 }

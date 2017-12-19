@@ -24,12 +24,15 @@ public class SearchClassInfoCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
     private String classPattern;
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         Class[] classes = inst.getAllLoadedClasses();
+        boolean result = false;
         for(Class clazz:classes){
             if(clazz.getName().equals(classPattern)){
+                result = true;
                 ctxT.writeAndFlush(new TClassInfo(clazz, true).rendering());
             }
         }
+        return result;
     }
 }

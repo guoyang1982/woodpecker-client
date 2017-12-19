@@ -50,12 +50,12 @@ public class WatchCommand extends AbstractCommand{
     }
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         Class[] classes = inst.getAllLoadedClasses();
+        boolean has = false;
         for(Class clazz:classes) {
-
             if (clazz.getName().equals(classPattern)) {
-
+                has = true;
                 SpyTransformer transformer = new SpyTransformer(methodPattern,isParam,isReturn,this);
                 inst.addTransformer(transformer, true);
                 try {
@@ -67,20 +67,16 @@ public class WatchCommand extends AbstractCommand{
                 }
             }
         }
+        return has;
     }
 
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
-//        StringBuffer result = new StringBuffer();
-//        result.append("className:"+className+"\r\n");
-//        result.append("methodName:"+methodName+"\r\n");
-//        //result.append("return:"+JSON.toJSONString(target)+"\r\n");
-//        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
 
         final TKv tKv = new TKv(
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(TTable.Align.LEFT));
         tKv.add("className",className);
-        tKv.add("methodName","methodName");
+        tKv.add("methodName",methodName);
         tKv.add("patameter",JSON.toJSONString(args));
 
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
@@ -93,16 +89,11 @@ public class WatchCommand extends AbstractCommand{
 
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
-//        StringBuffer result = new StringBuffer();
-//        result.append("className:"+className+"\r\n");
-//        result.append("methodName:"+methodName+"\r\n");
-//        result.append("patameter:"+ JSON.toJSONString(args)+"\r\n");
-//        result.append("return:"+JSON.toJSONString(returnObject)+"\r\n");
         final TKv tKv = new TKv(
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(TTable.Align.LEFT));
         tKv.add("className",className);
-        tKv.add("methodName","methodName");
+        tKv.add("methodName",methodName);
         tKv.add("patameter",JSON.toJSONString(args));
         tKv.add("return",JSON.toJSONString(returnObject));
 

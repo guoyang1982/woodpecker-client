@@ -53,7 +53,7 @@ public class NettyTelnetServer {
                                 new DelimiterBasedFrameDecoder(8192, Delimiters.lineDelimiter()),
                                 new StringDecoder(), //
                                 new StringEncoder(), //
-                                new IdleStateHandler(0, 0, 300),
+                                new IdleStateHandler(0, 0, 600),
                                 new NettyConnetManageHandler(),
                                 new NettyTelnetHandler());
                     }

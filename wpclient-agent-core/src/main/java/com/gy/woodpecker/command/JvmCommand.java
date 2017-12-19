@@ -33,7 +33,7 @@ public class JvmCommand extends AbstractCommand{
     private final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
     private final ThreadMXBean threadMXBean = ManagementFactory.getThreadMXBean();
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                 new TTable.ColumnDefine(RIGHT),
                 new TTable.ColumnDefine(LEFT)
@@ -58,6 +58,7 @@ public class JvmCommand extends AbstractCommand{
         tTable.addRow("THREAD", drawThreadTable());
 
         ctxT.writeAndFlush(tTable.rendering());
+        return true;
     }
 
     private String toCol(Collection<String> strings) {

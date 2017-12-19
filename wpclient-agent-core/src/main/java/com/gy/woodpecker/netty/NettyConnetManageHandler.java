@@ -67,7 +67,8 @@ public class NettyConnetManageHandler  extends ChannelDuplexHandler {
             IdleStateEvent evnet = (IdleStateEvent) evt;
             if (evnet.state().equals(IdleState.ALL_IDLE)) {
                 int sessionId = SessionManager.getSessionId(ctx);
-                log.info("idle sessionId="+sessionId);
+                log.info("idle sessionId="+sessionId+",close netty!");
+                ctx.close();
             }
         }
         ctx.fireUserEventTriggered(evt);

@@ -164,6 +164,71 @@ public class GaStringUtils {
     public static String tranClassName(String className) {
         return StringUtils.replace(className, "/", ".");
     }
+    /**
+     * 统一获取线程信息
+     *
+     * @return 线程摘要信息(一行)
+     */
+    public static String getThreadInfo() {
+        final Thread currentThread = Thread.currentThread();
+        return String.format("thread_name=\"%s\" thread_id=0x%s;is_daemon=%s;priority=%s;",
+                currentThread.getName(),
+                Long.toHexString(currentThread.getId()),
+                currentThread.isDaemon(),
+                currentThread.getPriority());
+    }
+
+    /**
+     * 获取方法执行堆栈信息
+     * 从下网上获取线程栈，遇到com.gy.woodpecker.则终止
+     * @return 方法堆栈信息
+     */
+    public static String getStack(final String title) {
+
+        final Thread currentThread = Thread.currentThread();
+        final StackTraceElement[] stackTraceElementArray = currentThread.getStackTrace();
+
+        final GaStack<StackTraceElement> elementStack = new ThreadUnsafeGaStack<StackTraceElement>();
+
+        final int length = stackTraceElementArray.length;
+
+        if (length > 0) {
+            for (int index = length - 1; index >= 0; index--) {
+                final StackTraceElement element = stackTraceElementArray[index];
+                if (StringUtils.startsWith(element.getClassName(), "com.gy.woodpecker.")) {
+//                    for (int step = 0; step < 4 && !elementStack.isEmpty(); step++) {
+//                        final StackTraceElement skipElement = elementStack.pop();
+//                        if (StringUtils.startsWith(skipElement.getClassName(), "java.lang.reflect.Method")
+//                                && StringUtils.equals(skipElement.getMethodName(), "invoke")) {
+//                            break;
+//                        }
+//                    }
+                    break;
+                }
+                elementStack.push(element);
+            }
+        }
+
+        final StackTraceElement locationStackTraceElement = elementStack.pop();
+        final StringBuilder locationSB = new StringBuilder("    @")
+                .append(locationStackTraceElement.getClassName()).append(".").append(locationStackTraceElement.getMethodName())
+                .append("(").append(locationStackTraceElement.getFileName()).append(":").append(locationStackTraceElement.getLineNumber()).append(")");
+
+        final StringBuilder stSB = new StringBuilder()
+                .append(title).append("\n")
+                .append(locationSB.toString()).append("\n");
+
+        while (!elementStack.isEmpty()) {
+            final StackTraceElement ste = elementStack.pop();
+            stSB
+                    .append("        at ")
+                    .append(ste.getClassName()).append(".")
+                    .append(ste.getMethodName())
+                    .append("(").append(ste.getFileName()).append(":").append(ste.getLineNumber()).append(")\n");
+        }
+
+        return stSB.toString();
+    }
 
     /**
      * 自动换行

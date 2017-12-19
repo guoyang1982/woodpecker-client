@@ -30,12 +30,12 @@ public class ResetCommand extends AbstractCommand {
     private boolean isAllClass = false;
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
 
         Map<Integer, List> classNames = SpyTransformer.classNameCache;
         if(classNames.size() == 0){
             ctxT.writeAndFlush("无需要恢复的类!\n");
-            return;
+            return false;
         }
 
         final ClassFileTransformer resetClassFileTransformer = new ClassFileTransformer() {
@@ -52,7 +52,7 @@ public class ResetCommand extends AbstractCommand {
 
         List classNameList = classNames.get(getSessionId());
         if(null == classNameList){
-            return;
+            return false;
         }
         try {
             inst.addTransformer(resetClassFileTransformer, true);
@@ -85,5 +85,6 @@ public class ResetCommand extends AbstractCommand {
             }
             ctxT.writeAndFlush("已经恢复!\n");
         }
+        return true;
     }
 }

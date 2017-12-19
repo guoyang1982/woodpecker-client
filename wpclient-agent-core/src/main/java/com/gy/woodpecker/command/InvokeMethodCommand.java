@@ -34,7 +34,7 @@ public class InvokeMethodCommand extends AbstractCommand {
     private boolean isSpring = false;
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         if(isSpring){
             Class[] classes = inst.getAllLoadedClasses();
             for(Class clazz:classes) {
@@ -81,5 +81,6 @@ public class InvokeMethodCommand extends AbstractCommand {
                 log.error("invoke method fail!", e);
             }
         }
+        return true;
     }
 }

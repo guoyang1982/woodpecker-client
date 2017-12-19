@@ -2,11 +2,17 @@ package com.gy.woodpecker.transformer;
 
 import com.gy.woodpecker.command.Command;
 import com.gy.woodpecker.config.ContextConfig;
+import com.gy.woodpecker.enumeration.ClassTypeEnum;
+import com.gy.woodpecker.enumeration.CommandEnum;
 import com.gy.woodpecker.weaver.AdviceWeaver;
 import javassist.*;
 import javassist.bytecode.CodeAttribute;
 import javassist.bytecode.LocalVariableAttribute;
 import javassist.bytecode.MethodInfo;
+import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
+import javassist.expr.Handler;
+import javassist.expr.MethodCall;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
@@ -33,14 +39,14 @@ public class SpyTransformer implements ClassFileTransformer {
 
     String methodName;
     boolean beforeMethod;
-   // boolean throwMethod;
+    // boolean throwMethod;
     boolean afterMethod;
     Command command;
 
     public SpyTransformer(String methodName, boolean beforeMethod, boolean afterMethod, Command command) {
         this.methodName = methodName;
         this.beforeMethod = beforeMethod;
-       // this.throwMethod = throwMethod;
+        // this.throwMethod = throwMethod;
         this.afterMethod = afterMethod;
         this.command = command;
     }
@@ -50,7 +56,7 @@ public class SpyTransformer implements ClassFileTransformer {
                             byte[] classfileBuffer) throws IllegalClassFormatException {
 
         //每次增强从缓存取 用于多人协助，如果不从缓存取 每次都是从classpath拿最原始字节码
-       // byte[] byteCode = classBytesCache.get(classBeingRedefined);
+        // byte[] byteCode = classBytesCache.get(classBeingRedefined);
 
         //if(null == byteCode){
         byte[] byteCode = classfileBuffer;
@@ -59,12 +65,12 @@ public class SpyTransformer implements ClassFileTransformer {
         className = className.replace('/', '.');
 
         List classNames = classNameCache.get(command.getSessionId());
-        if(null == classNames){
+        if (null == classNames) {
             classNames = new ArrayList();
-            classNameCache.put(command.getSessionId(),classNames);
+            classNameCache.put(command.getSessionId(), classNames);
         }
 
-        if(!classNames.contains(classBeingRedefined)){
+        if (!classNames.contains(classBeingRedefined)) {
             classNames.add(classBeingRedefined);
         }
 
@@ -73,7 +79,7 @@ public class SpyTransformer implements ClassFileTransformer {
         }
         byteCode = aopLog(loader, className, byteCode);
 
-        classBytesCache.put(classBeingRedefined,byteCode);
+        classBytesCache.put(classBeingRedefined, byteCode);
         return byteCode;
     }
 
@@ -87,9 +93,10 @@ public class SpyTransformer implements ClassFileTransformer {
                 cp.insertClassPath(new LoaderClassPath(loader));
                 cc = cp.get(className);
             }
-            byteCode = aopLog(loader,cc, className, byteCode);
+            byteCode = aopLog(loader, cc, className, byteCode);
         } catch (Exception ex) {
-            log.info("the applog exception:{}",ex);
+            log.info("the applog exception:{}", ex);
+            this.command.setRes(false);
         }
         return byteCode;
     }
@@ -103,15 +110,15 @@ public class SpyTransformer implements ClassFileTransformer {
             if (null != methods && methods.length > 0) {
                 for (CtMethod m : methods) {
                     if (m.getName().equals(methodName)) {
-                        aopLog(loader,className, m);
+                        aopLog(loader, className, m);
                     }
                 }
                 byteCode = cc.toBytecode();
             }
         }
         cc.detach();
-        if(ContextConfig.isdumpClass){
-            dumpClassIfNecessary("./woodpecker-class-dump/"+className,byteCode);
+        if (ContextConfig.isdumpClass) {
+            dumpClassIfNecessary("./woodpecker-class-dump/" + className, byteCode);
         }
         return byteCode;
     }
@@ -124,7 +131,7 @@ public class SpyTransformer implements ClassFileTransformer {
 //        if (!GlobalOptions.isDump) {
 //            return;
 //        }
-        final File dumpClassFile = new File( className + ".class");
+        final File dumpClassFile = new File(className + ".class");
         final File classPath = new File(dumpClassFile.getParent());
 
         // 创建类所在的包路径
@@ -149,39 +156,67 @@ public class SpyTransformer implements ClassFileTransformer {
             return;
         }
         System.out.println("进行插桩类:" + className);
-        MethodInfo methodInfo = m.getMethodInfo();
-        CodeAttribute codeAttribute = methodInfo.getCodeAttribute();
-        LocalVariableAttribute attr = (LocalVariableAttribute) codeAttribute.getAttribute(LocalVariableAttribute.tag);
-        Object[] paramNames = new Object[0];
-        try {
-            paramNames = new String[m.getParameterTypes().length];
-        } catch (NotFoundException e) {
-            e.printStackTrace();
-        }
-        int pos = Modifier.isStatic(m.getModifiers()) ? 0 : 1;
-        for (int i = 0; i < paramNames.length; i++)
-            paramNames[i] = attr.variableName(i + pos);
-//        // paramNames即参数名
-//        for (int i = 0; i < paramNames.length; i++) {
-//            System.out.println(paramNames[i]);
-//        }
+        String classLoad = className + ".class.getClassLoader()";
 
-        StringBuffer params = new StringBuffer();
-        params.append("java.util.List spyParamNames = new java.util.ArrayList();");
-        for (int i=0;i<paramNames.length;i++){
-            params.append("spyParamNames.add("+paramNames[i]+");");
+        //先在before之前做子函数调用增强，以免把before增强的代码给增强
+        if(command.getCommandType().equals(CommandEnum.TRACE)){
+            m.instrument(new ExprEditor() {
+                public void edit(MethodCall m)
+                        throws CannotCompileException {
+                    Integer lineNumber = m.getLineNumber();
+                    String clazzName = m.getClassName();
+                    String methodName = m.getMethodName();
+                    String methodDes = "";
+                    try {
+                        MethodInfo methodInfo1 = m.getMethod().getMethodInfo();
+                        methodDes = methodInfo1.getDescriptor();
+                    } catch (NotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeBeforeTracing("+command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\");";
+                    String after = "com.gy.woodpecker.agent.Spy.methodOnInvokeAfterTracing("+command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\");";
+                    m.replace("{ "+before+" $_ = $proceed($$); "+after+"}");
+                }
+            });
         }
+
+        if(command.getCommandType().equals(CommandEnum.TRACE)){
+            m.instrument(new ExprEditor() {
+                public void edit(Handler h)
+                        throws CannotCompileException {
+                    Integer lineNumber = h.getLineNumber();
+                    String clazzName = "";
+                    String methodName = "";
+                    String methodDes = "";
+                    String throwException = "$1";
+                    String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeThrowTracing("
+                            +command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\",$1);";
+                    h.insertBefore(before);
+                }
+            });
+        }
+
+        //目前只支持object 原子类型需要转换下
+        if(command.getCommandType().equals(CommandEnum.PRINT)){
+            String objPrintValue = command.getValue();
+            String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\","+objPrintValue+");";
+            m.insertAt(Integer.parseInt(command.getLineNumber()),printInfo);
+        }
+
         StringBuffer beforeBody = new StringBuffer();
 
-        if(beforeMethod){
-            beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod("+command.getSessionId()+",null,\""+className+"\",\""+m.getName()+"\",null,null,spyParamNames.toArray());");
-            m.insertBefore(params.toString()+beforeBody.toString());
+        if (beforeMethod) {
+            beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
+            //m.insertBefore(params.toString() + beforeBody.toString());
+            m.insertBefore(beforeBody.toString());
         }
+
         StringBuffer afterBody = new StringBuffer();
 
-        if(afterMethod){
-            afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod("+command.getSessionId()+",null,\""+className+"\",\""+m.getName()+"\",null,null,spyParamNames.toArray(),$_);");
-                m.insertAfter(params.toString()+afterBody.toString());
+        if (afterMethod) {
+            afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
+           // m.insertAfter(params.toString() + afterBody.toString());
+            m.insertAfter(afterBody.toString());
         }
 //        if(throwMethod){
 //            m.addCatch("", CtClass.);

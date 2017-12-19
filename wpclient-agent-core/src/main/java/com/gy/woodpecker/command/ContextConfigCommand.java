@@ -27,18 +27,19 @@ public class ContextConfigCommand extends AbstractCommand {
 
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         if (target.equals("dumpclazz")) {
             if (value.equals("true")) {
                 ContextConfig.isdumpClass = true;
                 ctxT.writeAndFlush("成功打开dump增强的类!\n");
-                return;
+                return true;
             }
             if (value.equals("false")) {
                 ContextConfig.isdumpClass = false;
                 ctxT.writeAndFlush("成功关闭dump增强的类!\n");
-                return;
+                return true;
             }
         }
+        return true;
     }
 }

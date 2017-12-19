@@ -32,7 +32,7 @@ public class LogInfoCommand extends AbstractCommand{
     }
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
 
         String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
         StringBuffer strLog = new StringBuffer();
@@ -44,6 +44,7 @@ public class LogInfoCommand extends AbstractCommand{
         }
 
         ctxT.writeAndFlush(strLog.toString());
+        return true;
     }
 
 

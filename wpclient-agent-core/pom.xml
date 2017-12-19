@@ -119,5 +119,9 @@
             <groupId>ognl</groupId>
             <artifactId>ognl</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+        </dependency>
     </dependencies>
 </project>

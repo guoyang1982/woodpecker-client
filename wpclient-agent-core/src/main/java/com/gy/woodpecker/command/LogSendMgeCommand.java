@@ -28,18 +28,19 @@ public class LogSendMgeCommand extends AbstractCommand {
     }
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
 
         if (isSend.equals("true")) {
             LoggerFacility.f = true;
             ctxT.writeAndFlush("成功打开日志监控!\n");
-            return;
+            return true;
         }
         if (isSend.equals("false")) {
             LoggerFacility.getInstall(null).f = false;
             ctxT.writeAndFlush("成功关闭日志监控!\n");
-            return;
+            return true;
         }
         ctxT.writeAndFlush("参数错误!\n");
+        return true;
     }
 }

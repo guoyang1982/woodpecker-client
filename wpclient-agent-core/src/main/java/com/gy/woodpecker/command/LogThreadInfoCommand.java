@@ -25,12 +25,13 @@ public class LogThreadInfoCommand extends AbstractCommand {
     }
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
        String threadInfo = LoggerFacility.threadPoolsMonitor()+"\n";
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                 new TTable.ColumnDefine()
         });
         tTable.addRow(threadInfo);
         ctxT.writeAndFlush(tTable.rendering());
+        return true;
     }
 }

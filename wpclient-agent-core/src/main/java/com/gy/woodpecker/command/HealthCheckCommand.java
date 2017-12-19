@@ -30,16 +30,17 @@ public class HealthCheckCommand extends AbstractCommand {
     }
 
     @Override
-    public void excute(Instrumentation inst) {
+    public boolean excute(Instrumentation inst) {
         if (isHC.equals("true")) {
             RedisClient.RedisClientInstance.telHealthCheck = true;
             ctxT.writeAndFlush("成功打开健康检查!\n");
-            return;
+            return true;
         }
         if (isHC.equals("false")) {
             RedisClient.RedisClientInstance.telHealthCheck = false;
             ctxT.writeAndFlush("成功关闭健康检查!\n");
-            return;
+            return true;
         }
+        return true;
     }
 }

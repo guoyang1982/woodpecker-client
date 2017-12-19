@@ -117,6 +117,11 @@
             <artifactId>ognl</artifactId>
             <version>3.0.8</version>
         </dependency>
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>5.0.3</version>
+        </dependency>
     </dependencies>
     </dependencyManagement>
 </project>

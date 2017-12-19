@@ -19,16 +19,14 @@ public class AdviceWeaver {
 
 
     /**
-     * 方法开始<br/>
-     * 用于编织通知器,外部不会直接调用
+     * 前置通知
      *
      * @param loader     类加载器
-     * @param adviceId   通知ID
      * @param className  类名
      * @param methodName 方法名
      * @param methodDesc 方法描述
-     * @param target     返回结果
-     *                   若为无返回值方法(void),则为null
+     * @param target     目标类实例
+     *                   若目标为静态方法,则为null
      * @param args       参数列表
      */
     public static void methodOnBegin(
@@ -82,6 +80,51 @@ public class AdviceWeaver {
 
     }
 
+    /**
+     * 方法内部调用开始
+     *
+     * @param adviceId   通知ID
+     * @param lineNumber 代码行号
+     * @param owner      调用类名
+     * @param name       调用方法名
+     * @param desc       调用方法描述
+     */
+    public static void methodOnInvokeBeforeTracing(int adviceId, int lineNumber, String owner, String name, String desc) {
+        if (!advices.containsKey(adviceId)) {
+            return;
+        }
+        Command command = advices.get(adviceId);
+        try{
+            command.invokeBeforeTracing(lineNumber, owner, name, desc);
+
+        }finally {
+
+        }
+    }
+
+
+    /**
+     * 方法内部调用结束(正常返回)
+     *
+     * @param adviceId   通知ID
+     * @param lineNumber 代码行号
+     * @param owner      调用类名
+     * @param name       调用方法名
+     * @param desc       调用方法描述
+     */
+    public static void methodOnInvokeAfterTracing(int adviceId, int lineNumber, String owner, String name, String desc) {
+        if (!advices.containsKey(adviceId)) {
+            return;
+        }
+        Command command = advices.get(adviceId);
+        try{
+            command.invokeAfterTracing(lineNumber, owner, name, desc);
+
+        }finally {
+
+        }
+    }
+
     private static void before(Command command,
                                ClassLoader loader, String className, String methodName, String methodDesc,
                                Object target, Object[] args) {
@@ -109,6 +152,43 @@ public class AdviceWeaver {
         }
 
     }
+
+    public static void printMethod(int adviceId,
+                                   ClassLoader loader, String className, String methodName,
+                                   Object printTarget){
+        if (!advices.containsKey(adviceId)) {
+            return;
+        }
+        Command command = advices.get(adviceId);
+        try{
+            command.invokePrint(loader, className,methodName,printTarget);
+        }finally {
+
+        }
+    }
+
+    /**
+     * 方法内部调用(异常返回)
+     *
+     * @param adviceId       通知ID
+     * @param lineNumber     代码行号
+     * @param owner          调用类名
+     * @param name           调用方法名
+     * @param desc           调用方法描述
+     * @param throwException 抛出的异常
+     */
+    public static void methodOnInvokeThrowTracing(int adviceId, int lineNumber, String owner, String name, String desc, Object throwException) {
+        if (!advices.containsKey(adviceId)) {
+            return;
+        }
+        Command command = advices.get(adviceId);
+        try{
+            command.invokeThrowTracing(lineNumber, owner,name,desc,throwException);
+        }finally {
+
+        }
+    }
+
 
     private static Command getListener(int adviceId) {
         return advices.get(adviceId);
