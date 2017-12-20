@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import com.alibaba.fastjson.JSONObject;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.message.MessageBean;
 import com.gy.woodpecker.redis.RedisClient;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
@@ -32,10 +33,10 @@ import java.util.concurrent.*;
 public class LoggerFacility {
     private static volatile LoggerFacility loggerFacility;
 
-    public static Instrumentation inst;
+    //public static Instrumentation inst;
     protected RedisClient redisClient;
 
-    private volatile String  appName;
+    private volatile String appName;
 
     private volatile String healthCheck = "true";
 
@@ -52,9 +53,9 @@ public class LoggerFacility {
     private static ThreadPoolExecutor executorPools =
             new ThreadPoolExecutor(corePoolSize, maximumPoolSize, keepAliveTime, TimeUnit.SECONDS,
                     new ArrayBlockingQueue<Runnable>(queueCount),
-            new MessageRejectedExecutionHandler());
+                    new MessageRejectedExecutionHandler());
 
-    public static String threadPoolsMonitor(){
+    public static String threadPoolsMonitor() {
         int activeCount = executorPools.getActiveCount();
         long completedTaskCount = executorPools.getCompletedTaskCount();
         int corePoolSize = executorPools.getCorePoolSize();
@@ -80,11 +81,11 @@ public class LoggerFacility {
         this.appName = appName;
     }
 
-    private LoggerFacility(){
-        try{
+    private LoggerFacility() {
+        try {
             initConfig();
 
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
     }
@@ -92,24 +93,24 @@ public class LoggerFacility {
     private void initConfig() {
         this.appName = ConfigPropertyUtile.getProperties().getProperty("application.name");
         String healthCheckT = ConfigPropertyUtile.getProperties().getProperty("redis.health.Check");
-        if(null != healthCheckT && !healthCheckT.equals("")){
+        if (null != healthCheckT && !healthCheckT.equals("")) {
             this.healthCheck = healthCheckT;
         }
 
         String corePoolSizeT = ConfigPropertyUtile.getProperties().getProperty("log.thread.corePoolSize");
-        if(null != corePoolSizeT && !corePoolSizeT.equals("")){
+        if (null != corePoolSizeT && !corePoolSizeT.equals("")) {
             this.corePoolSize = Integer.parseInt(corePoolSizeT);
         }
         String maximumPoolSizeT = ConfigPropertyUtile.getProperties().getProperty("log.thread.maximumPoolSize");
-        if(null != maximumPoolSizeT && !maximumPoolSizeT.equals("")){
+        if (null != maximumPoolSizeT && !maximumPoolSizeT.equals("")) {
             this.maximumPoolSize = Integer.parseInt(maximumPoolSizeT);
         }
         String keepAliveTimeT = ConfigPropertyUtile.getProperties().getProperty("log.thread.keepAliveTime");
-        if(null != keepAliveTimeT && !keepAliveTimeT.equals("")){
+        if (null != keepAliveTimeT && !keepAliveTimeT.equals("")) {
             this.keepAliveTime = Integer.parseInt(keepAliveTimeT);
         }
         String queueCountT = ConfigPropertyUtile.getProperties().getProperty("log.thread.queue.count");
-        if(null != queueCountT && !queueCountT.equals("")){
+        if (null != queueCountT && !queueCountT.equals("")) {
             this.queueCount = Integer.parseInt(queueCountT);
         }
 
@@ -119,22 +120,25 @@ public class LoggerFacility {
         if (!healthCheck.equals("false")) {
             RedisClient.RedisClientInstance.healthCheck(appName);
         }
+
+
         //处理要插桩的类
-        inst.addTransformer(new WoodpeckTransformer());
+        System.out.println("?????????处理要插桩的类");
+        ContextConfig.inst.addTransformer(new WoodpeckTransformer());
+        //inst.addTransformer(new WoodpeckTransformer());
     }
 
     /**
-     *
      * @return
      */
-    public static LoggerFacility getInstall(Instrumentation instT){
-        if(null == loggerFacility){
-            synchronized (LoggerFacility.class){
-                if(null == loggerFacility){
-                    if(null != instT){
-
-                        inst = instT;
-                    }
+    public static LoggerFacility getInstall() {
+        if (null == loggerFacility) {
+            synchronized (LoggerFacility.class) {
+                if (null == loggerFacility) {
+//                    if(null != instT){
+//
+//                        inst = instT;
+//                    }
                     loggerFacility = new LoggerFacility();
                 }
             }
@@ -145,20 +149,21 @@ public class LoggerFacility {
 
     /**
      * 发送消息
+     *
      * @param msg
      */
     public void sendToRedis(final String msg) {
-        log.info("发送异常日志消息!"+msg);
+        log.info("发送异常日志消息!" + msg);
 
-        if(!slog){
-            log.info("客户端关闭了发送日志, 不处理操作!");
+        if (!slog) {
+            log.info("客户端关闭了发送, 不处理操作!");
             return;
         }
         if (!f) {
             log.info("redis集群不健康, 不处理操作!");
             return;
         }
-        if(null == appName || appName.equals("")){
+        if (null == appName || appName.equals("")) {
             log.info("应用名为空, 不处理操作!");
             return;
         }
@@ -173,13 +178,14 @@ public class LoggerFacility {
 
                     RedisClient.RedisClientInstance.rightPush(appName, JSONObject.toJSONString(messageBean));
                 } catch (Exception e) {
-                    log.info("发送异常日志消息失败!"+e.getMessage());
+                    log.info("发送异常日志消息失败!" + e.getMessage());
                 }
 
             }
         });
     }
-    private String timeForNow(){
+
+    private String timeForNow() {
         SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Date now = new Date();
         return format.format(now);
@@ -193,7 +199,7 @@ public class LoggerFacility {
             // 监控
             if (log.isInfoEnabled()) {
                 log.info("LoggerFacility rejectedExecution, ThreadPoolExecutor:{}", executor.toString());
-           }
+            }
         }
     }
 }

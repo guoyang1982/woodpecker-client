@@ -1,6 +1,7 @@
 package com.gy.woodpecker.netty;
 
 import com.gy.woodpecker.command.ResetCommand;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.session.SessionManager;
 import com.gy.woodpecker.tools.GaStringUtils;
@@ -57,7 +58,7 @@ public class NettyConnetManageHandler  extends ChannelDuplexHandler {
         ResetCommand resetCommand = new ResetCommand();
         resetCommand.setCtxT(ctx);
         resetCommand.setSessionId(SessionManager.getSessionId(ctx));
-        resetCommand.excute(LoggerFacility.inst);
+        resetCommand.excute(ContextConfig.inst);
         super.channelInactive(ctx);
     }
 

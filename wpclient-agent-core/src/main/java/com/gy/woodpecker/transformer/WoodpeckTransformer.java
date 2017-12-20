@@ -27,45 +27,45 @@ public class WoodpeckTransformer implements ClassFileTransformer {
             "com.gy.woodpecker.agent.LoggerFactoryProx.sendToRedis(message.toString());}";
 
 
-    public boolean validLevel(String level){
-        if(null == level || level.equals("")){
+    public boolean validLevel(String level) {
+        if (null == level || level.equals("")) {
             return false;
         }
-        if(level.toUpperCase().equals("ERROR")){
+        if (level.toUpperCase().equals("ERROR")) {
             return true;
         }
-        if(level.toUpperCase().equals("INFO")){
+        if (level.toUpperCase().equals("INFO")) {
             return true;
         }
-        if(level.toUpperCase().equals("DEBUG")){
+        if (level.toUpperCase().equals("DEBUG")) {
             return true;
         }
 
         return false;
     }
 
-    public WoodpeckTransformer(){
+    public WoodpeckTransformer() {
         String logerT = ConfigPropertyUtile.getProperties().getProperty("agent.log.name");
         String level = ConfigPropertyUtile.getProperties().getProperty("agent.log.level");
 
-        if(null != logerT && !logerT.equals("")){
+        if (null != logerT && !logerT.equals("")) {
             loger = logerT;
         }
-        if(loger.equals("logback")){
+        if (loger.equals("logback")) {
             loggerClassic = "ch.qos.logback.classic.Logger";
             methodName = "buildLoggingEventAndAppend";
-            if(validLevel(level)){
-                javassistInfo = logbakInfo.replaceFirst("ERROR",level);
-            }else {
+            if (validLevel(level)) {
+                javassistInfo = logbakInfo.replaceFirst("ERROR", level);
+            } else {
                 javassistInfo = logbakInfo;
             }
         }
-        if(loger.equals("log4j")){
+        if (loger.equals("log4j")) {
             loggerClassic = "org.apache.log4j.Category";
             methodName = "forcedLog";
-            if(validLevel(level)){
-                javassistInfo = log4jInfo.replaceFirst("ERROR",level);
-            }else {
+            if (validLevel(level)) {
+                javassistInfo = log4jInfo.replaceFirst("ERROR", level);
+            } else {
                 javassistInfo = log4jInfo;
             }
         }
@@ -90,15 +90,12 @@ public class WoodpeckTransformer implements ClassFileTransformer {
         try {
             ClassPool cp = ClassPool.getDefault();
             CtClass cc = null;
-            try {
-                cc = cp.get(className);
-            } catch (NotFoundException e) {
-                cp.insertClassPath(new LoaderClassPath(loader));
-                cc = cp.get(className);
-            }
+            //加载类的路径 从应用的classloader搜索类
+            cp.insertClassPath(new LoaderClassPath(loader));
+            cc = cp.get(className);
             byteCode = aopLog(cc, className, byteCode);
         } catch (Exception ex) {
-            log.info("the applog exception:{}",ex);
+            log.info("the applog exception:{}", ex);
         }
         return byteCode;
     }
@@ -127,9 +124,9 @@ public class WoodpeckTransformer implements ClassFileTransformer {
         if (null == m || m.isEmpty()) {
             return;
         }
-        log.info("进行插桩类:"+className);
+        log.info("进行插桩类:" + className);
 
-        String ip=com.gy.woodpecker.tools.IPUtile.getIntranetIP();
+        String ip = com.gy.woodpecker.tools.IPUtile.getIntranetIP();
         m.insertBefore(javassistInfo);
     }
 

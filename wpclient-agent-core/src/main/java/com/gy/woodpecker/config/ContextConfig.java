@@ -1,5 +1,7 @@
 package com.gy.woodpecker.config;
 
+import java.lang.instrument.Instrumentation;
+
 /**
  * @author guoyang
  * @Description: TODO
@@ -7,4 +9,9 @@ package com.gy.woodpecker.config;
  */
 public class ContextConfig {
     public static boolean isdumpClass = false;
+    public static Instrumentation inst = null;
+
+    public static void setInst(Instrumentation inst) {
+        ContextConfig.inst = inst;
+    }
 }

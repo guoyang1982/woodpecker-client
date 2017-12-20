@@ -1,5 +1,6 @@
 package com.gy.woodpecker.netty;
 
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.handler.CommandHandler;
 import com.gy.woodpecker.handler.DefaultCommandHandler;
 import com.gy.woodpecker.log.LoggerFacility;
@@ -36,7 +37,7 @@ public class NettyTelnetHandler extends SimpleChannelInboundHandler<String> {
             ctx.writeAndFlush(response);
         }else {
             int sessionId = SessionManager.getSessionId(ctx);
-            commandHandler.executeCommand(request,ctx,LoggerFacility.inst,sessionId);
+            commandHandler.executeCommand(request,ctx, ContextConfig.inst,sessionId);
         }
     }
 }

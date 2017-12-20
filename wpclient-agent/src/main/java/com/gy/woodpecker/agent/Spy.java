@@ -150,7 +150,6 @@ public class Spy {
             Method throwInvokingMethod,
             Method agentResetMethod,
             Method printMethod) {
-        System.out.println("?????????????????????"+onBeforeMethod+onReturnMethod+onThrowsMethod+beforeInvokingMethod+afterInvokingMethod+throwInvokingMethod+agentResetMethod+printMethod);
         ON_BEFORE_METHOD = onBeforeMethod;
         ON_RETURN_METHOD = onReturnMethod;
         ON_THROWS_METHOD = onThrowsMethod;

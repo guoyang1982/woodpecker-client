@@ -36,7 +36,7 @@ public class LogSendMgeCommand extends AbstractCommand {
             return true;
         }
         if (isSend.equals("false")) {
-            LoggerFacility.getInstall(null).slog = false;
+            LoggerFacility.getInstall().slog = false;
             ctxT.writeAndFlush("成功关闭日志监控!\n");
             return true;
         }

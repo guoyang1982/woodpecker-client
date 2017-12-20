@@ -30,7 +30,9 @@ cp ../wpclient-agent-core/target/wpclient-agent-core-1.0-SNAPSHOT-jar-with-depen
 chmod 777 ${WOODPECKER_PROPERTIES}
 cp ${WOODPECKER_PROPERTIES} ${WOODPECKER_TARGET_DIR}/woodpecker.properties
 chmod 777 ./woodpecker-run.sh
+chmod 777 ./woodpecker-launch.sh
 cp ./woodpecker-run.sh ${WOODPECKER_TARGET_DIR}
+cp ./woodpecker-launch.sh ${WOODPECKER_TARGET_DIR}
 
 # zip the greys
 cd ../target/

@@ -44,7 +44,8 @@ public class AdviceWeaver {
             // 获取通知器并做前置通知
             before(command, loader, className, methodName, methodDesc, target, args);
 
-        } finally {
+        } catch (Exception e){
+            log.error("methodOnBegin fail!{}",e);
         }
 
     }
@@ -75,7 +76,8 @@ public class AdviceWeaver {
             // 获取通知器并做后置通知
             after(command, loader, className, methodName, methodDesc, target, args,returnObj);
 
-        } finally {
+        } catch (Exception e){
+            log.error("methodOnEnd fail!{}",e);
         }
 
     }
@@ -97,8 +99,8 @@ public class AdviceWeaver {
         try{
             command.invokeBeforeTracing(lineNumber, owner, name, desc);
 
-        }finally {
-
+        }catch (Exception e){
+            log.error("methodOnInvokeBeforeTracing fail!{}",e);
         }
     }
 
@@ -120,8 +122,8 @@ public class AdviceWeaver {
         try{
             command.invokeAfterTracing(lineNumber, owner, name, desc);
 
-        }finally {
-
+        }catch (Exception e){
+            log.error("methodOnInvokeAfterTracing fail!{}",e);
         }
     }
 
@@ -162,8 +164,8 @@ public class AdviceWeaver {
         Command command = advices.get(adviceId);
         try{
             command.invokePrint(loader, className,methodName,printTarget);
-        }finally {
-
+        }catch (Exception e){
+            log.error("printMethod fail!{}",e);
         }
     }
 
@@ -184,8 +186,8 @@ public class AdviceWeaver {
         Command command = advices.get(adviceId);
         try{
             command.invokeThrowTracing(lineNumber, owner,name,desc,throwException);
-        }finally {
-
+        }catch (Exception e){
+            log.error("methodOnInvokeThrowTracing fail!{}",e);
         }
     }
 
@@ -202,9 +204,6 @@ public class AdviceWeaver {
      * @param command 命令
      */
     public static void reg(int adviceId, Command command) {
-
-        // 触发监听器创建
-        //listener.create();
 
         // 注册监听器
         advices.put(adviceId, command);

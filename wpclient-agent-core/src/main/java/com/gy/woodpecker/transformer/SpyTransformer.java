@@ -83,12 +83,13 @@ public class SpyTransformer implements ClassFileTransformer {
         try {
             ClassPool cp = ClassPool.getDefault();
             CtClass cc = null;
-            try {
-                cc = cp.get(className);
-            } catch (NotFoundException e) {
-                cp.insertClassPath(new LoaderClassPath(loader));
-                cc = cp.get(className);
-            }
+            //try {
+            cp.insertClassPath(new LoaderClassPath(loader));
+            cc = cp.get(className);
+//            } catch (NotFoundException e) {
+//                cp.insertClassPath(new LoaderClassPath(loader));
+//                cc = cp.get(className);
+//            }
             byteCode = aopLog(loader, cc, className, byteCode);
         } catch (Exception ex) {
             log.info("the applog exception:{}", ex);
@@ -153,7 +154,7 @@ public class SpyTransformer implements ClassFileTransformer {
         String classLoad = className + ".class.getClassLoader()";
 
         //先在before之前做子函数调用增强，以免把before增强的代码给增强
-        if(command.getCommandType().equals(CommandEnum.TRACE)){
+        if (command.getCommandType().equals(CommandEnum.TRACE)) {
             m.instrument(new ExprEditor() {
                 public void edit(MethodCall m)
                         throws CannotCompileException {
@@ -167,14 +168,14 @@ public class SpyTransformer implements ClassFileTransformer {
                     } catch (NotFoundException e) {
                         e.printStackTrace();
                     }
-                    String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeBeforeTracing("+command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\");";
-                    String after = "com.gy.woodpecker.agent.Spy.methodOnInvokeAfterTracing("+command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\");";
-                    m.replace("{ "+before+" $_ = $proceed($$); "+after+"}");
+                    String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeBeforeTracing(" + command.getSessionId() + "," + lineNumber + ",\"" + clazzName + "\",\"" + methodName + "\",\"" + methodDes + "\");";
+                    String after = "com.gy.woodpecker.agent.Spy.methodOnInvokeAfterTracing(" + command.getSessionId() + "," + lineNumber + ",\"" + clazzName + "\",\"" + methodName + "\",\"" + methodDes + "\");";
+                    m.replace("{ " + before + " $_ = $proceed($$); " + after + "}");
                 }
             });
         }
 
-        if(command.getCommandType().equals(CommandEnum.TRACE)){
+        if (command.getCommandType().equals(CommandEnum.TRACE)) {
             m.instrument(new ExprEditor() {
                 public void edit(Handler h)
                         throws CannotCompileException {
@@ -184,16 +185,16 @@ public class SpyTransformer implements ClassFileTransformer {
                     String methodDes = "";
                     String throwException = "$1";
                     String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeThrowTracing("
-                            +command.getSessionId()+","+lineNumber+",\""+clazzName+"\",\""+methodName+"\",\""+methodDes+"\",$1);";
+                            + command.getSessionId() + "," + lineNumber + ",\"" + clazzName + "\",\"" + methodName + "\",\"" + methodDes + "\",$1);";
                     h.insertBefore(before);
                 }
             });
         }
 
-        if(command.getCommandType().equals(CommandEnum.PRINT)){
+        if (command.getCommandType().equals(CommandEnum.PRINT)) {
             String objPrintValue = command.getValue();
-            String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\","+objPrintValue+");";
-            m.insertAt(Integer.parseInt(command.getLineNumber()),printInfo);
+            String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\"," + objPrintValue + ");";
+            m.insertAt(Integer.parseInt(command.getLineNumber()), printInfo);
         }
 
         StringBuffer beforeBody = new StringBuffer();
