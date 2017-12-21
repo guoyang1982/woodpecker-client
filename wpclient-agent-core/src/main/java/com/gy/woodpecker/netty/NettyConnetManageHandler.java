@@ -5,9 +5,7 @@ import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.session.SessionManager;
 import com.gy.woodpecker.tools.GaStringUtils;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelDuplexHandler;
-import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.*;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.Attribute;
@@ -63,13 +61,29 @@ public class NettyConnetManageHandler  extends ChannelDuplexHandler {
     }
 
     @Override
-    public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
+    public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception {
         if (evt instanceof IdleStateEvent) {
             IdleStateEvent evnet = (IdleStateEvent) evt;
-            if (evnet.state().equals(IdleState.ALL_IDLE)) {
-                int sessionId = SessionManager.getSessionId(ctx);
-                log.info("idle sessionId="+sessionId+",close netty!");
-                ctx.close();
+            //客户端没有命令输入 ping下看是否关闭了
+            if (evnet.state().equals(IdleState.READER_IDLE)) {
+                ctx.channel().writeAndFlush("\1").addListener(new ChannelFutureListener() {
+                    public void operationComplete(ChannelFuture f) throws Exception {
+                        if (f.isSuccess()) {
+                            log.info("ping success!");
+                            return;
+                        }
+                        else {
+                            int sessionId = SessionManager.getSessionId(ctx);
+                            log.info("客户端关闭,准备清理增强的代码!");
+                            ResetCommand resetCommand = new ResetCommand();
+                            resetCommand.setCtxT(ctx);
+                            resetCommand.setSessionId(SessionManager.getSessionId(ctx));
+                            resetCommand.excute(ContextConfig.inst);
+                            log.info("idle sessionId="+sessionId+",close netty!");
+                            ctx.close();
+                        }
+                    }
+                });
             }
         }
         ctx.fireUserEventTriggered(evt);

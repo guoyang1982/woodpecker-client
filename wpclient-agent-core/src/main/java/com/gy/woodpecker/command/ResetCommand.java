@@ -4,6 +4,7 @@ import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.transformer.SpyTransformer;
+import com.gy.woodpecker.weaver.AdviceWeaver;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.instrument.ClassFileTransformer;
@@ -31,9 +32,27 @@ public class ResetCommand extends AbstractCommand {
 
     @Override
     public boolean excute(Instrumentation inst) {
-
         Map<Integer, List> classNames = SpyTransformer.classNameCache;
-        if(classNames.size() == 0){
+        if (classNames.size() == 0) {
+            //还需要清空一遍命令
+            Map<Integer, Command> mapCommand = AdviceWeaver.getAdvices();
+            if (isAllClass) {
+                //回调清理命令
+                for (Map.Entry<Integer, Command> entry : mapCommand.entrySet()) {
+                    Command command = entry.getValue();
+                    if(null != command){
+                        command.destroy();
+                    }
+
+                }
+            } else {
+                //回调清理命令
+                Command command = mapCommand.get(getSessionId());
+                if(null != command){
+                    command.destroy();
+                }
+            }
+
             ctxT.writeAndFlush("无需要恢复的类!\n");
             return false;
         }
@@ -51,15 +70,15 @@ public class ResetCommand extends AbstractCommand {
         };
 
         List classNameList = classNames.get(getSessionId());
-        if(null == classNameList){
+        if (null == classNameList) {
             return false;
         }
         try {
             inst.addTransformer(resetClassFileTransformer, true);
 
-            if(isAllClass){
+            if (isAllClass) {
                 Set set = new HashSet();
-                for(List list : classNames.values()){
+                for (List list : classNames.values()) {
                     //去重复
                     set.addAll(list);
                 }
@@ -67,22 +86,36 @@ public class ResetCommand extends AbstractCommand {
                 final Class<?>[] classArray = new Class<?>[set.size()];
                 arraycopy(set.toArray(), 0, classArray, 0, set.size());
                 inst.retransformClasses(classArray);
-            }else{
+            } else {
                 // 批量增强
                 final Class<?>[] classArray = new Class<?>[classNameList.size()];
                 arraycopy(classNameList.toArray(), 0, classArray, 0, classNameList.size());
                 inst.retransformClasses(classArray);
             }
 
-        } catch (Exception e){
-            log.error("恢复增强类失败!",e);
-        }finally {
+        } catch (Exception e) {
+            log.error("恢复增强类失败!", e);
+        } finally {
             inst.removeTransformer(resetClassFileTransformer);
-            if(isAllClass){
+            Map<Integer, Command> mapCommand = AdviceWeaver.getAdvices();
+            if (isAllClass) {
                 classNames.clear();
-            }else {
+                //回调清理命令
+                for (Map.Entry<Integer, Command> entry : mapCommand.entrySet()) {
+                    Command command = entry.getValue();
+                    if(null != command){
+                        command.destroy();
+                    }
+                }
+            } else {
                 classNames.remove(getSessionId());
+                //回调清理命令
+                Command command = mapCommand.get(getSessionId());
+                if(null != command){
+                    command.destroy();
+                }
             }
+
             ctxT.writeAndFlush("已经恢复!\n");
         }
         return true;

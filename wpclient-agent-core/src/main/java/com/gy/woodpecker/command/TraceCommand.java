@@ -66,6 +66,8 @@ public class TraceCommand extends AbstractCommand {
         if(!has){
             setRes(has);
         }
+        //等待结果
+        super.isWait = true;
         return res;
     }
 

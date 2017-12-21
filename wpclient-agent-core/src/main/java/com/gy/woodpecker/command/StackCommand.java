@@ -57,6 +57,8 @@ public class StackCommand extends AbstractCommand {
                 }
             }
         }
+        //等待结果
+        super.isWait = true;
         return has;
     }
 

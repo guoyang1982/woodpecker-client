@@ -7,6 +7,7 @@ import javassist.*;
 
 import javassist.bytecode.MethodInfo;
 import javassist.expr.ExprEditor;
+import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
 import lombok.extern.slf4j.Slf4j;
@@ -195,6 +196,7 @@ public class SpyTransformer implements ClassFileTransformer {
             String objPrintValue = command.getValue();
             String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\"," + objPrintValue + ");";
             m.insertAt(Integer.parseInt(command.getLineNumber()), printInfo);
+
         }
 
         StringBuffer beforeBody = new StringBuffer();

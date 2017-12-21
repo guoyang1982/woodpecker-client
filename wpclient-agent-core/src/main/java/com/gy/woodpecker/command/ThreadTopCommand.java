@@ -108,7 +108,6 @@ public class ThreadTopCommand extends AbstractCommand{
 
                 ctxT.writeAndFlush(tTable.rendering());
 
-                //printer.println(tTable.rendering()).finish();
                 return true;
         }
 

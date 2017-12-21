@@ -221,6 +221,9 @@ public class WPConsole {
         try {
             while (isRunning) {
                 final int c = socketReader.read();
+                if(c == 1){
+                    continue;
+                }
                 if (c == EOF) {
                     break;
                 }

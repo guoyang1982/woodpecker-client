@@ -67,6 +67,8 @@ public class WatchCommand extends AbstractCommand{
                 }
             }
         }
+        //等待结果
+        super.isWait = true;
         return has;
     }
 

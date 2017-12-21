@@ -17,6 +17,9 @@ public class AdviceWeaver {
     private final static Map<Integer/*ADVICE_ID*/, Command> advices
             = new ConcurrentHashMap<Integer, Command>();
 
+    public static Map<Integer, Command> getAdvices() {
+        return advices;
+    }
 
     /**
      * 前置通知

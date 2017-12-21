@@ -18,6 +18,7 @@ public abstract class AbstractCommand implements Command{
     ChannelHandlerContext ctxT;
     int sessionId;
     boolean res = true;
+    public  boolean isWait = false;
 
     public void setCtxT(ChannelHandlerContext ctxT) {
         this.ctxT = ctxT;
@@ -64,8 +65,9 @@ public abstract class AbstractCommand implements Command{
     @Override
     public void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException){
     }
-
-
+    @Override
+    public void destroy(){
+    }
     public void setSessionId(int sessionId){
         this.sessionId = sessionId;
     }
@@ -96,7 +98,7 @@ public abstract class AbstractCommand implements Command{
             ctxT.writeAndFlush("\0");
             return;
         }
-        if(!this.getIfEnhance()){
+        if(!isWait){
             ctxT.writeAndFlush("\0");
         }else {
             //类增强 并 等待结果

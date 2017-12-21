@@ -1,6 +1,5 @@
 package com.gy.woodpecker.command;
 
-import com.gy.woodpecker.enumeration.ClassTypeEnum;
 import com.gy.woodpecker.enumeration.CommandEnum;
 import io.netty.channel.ChannelHandlerContext;
 
@@ -39,6 +38,11 @@ public interface Command {
      * @return 返回命令所对应的命令动作
      */
     public void doAction(ChannelHandlerContext ctx,Instrumentation inst);
+
+    /**
+     * 命令销毁清除工作
+     */
+    public void destroy();
 
     /**
      * 前置通知
