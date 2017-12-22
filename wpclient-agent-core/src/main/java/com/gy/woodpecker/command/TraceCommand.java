@@ -189,17 +189,4 @@ public class TraceCommand extends AbstractCommand {
             this.tTree = tTree;
         }
     }
-
-    public static  void main(String args[]){
-        String str = "a >= 0";
-        ScriptEngineManager manager = new ScriptEngineManager();
-        ScriptEngine engine = manager.getEngineByName("js");
-        engine.put("a", -1);
-        try {
-            Object result = engine.eval(str);
-            System.out.println(result);
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        }
-    }
 }
