@@ -33,6 +33,9 @@ public class SearchClassInfoCommand extends AbstractCommand {
                 ctxT.writeAndFlush(new TClassInfo(clazz, true).rendering());
             }
         }
+        if(!result){
+            ctxT.writeAndFlush("not find class!\n");
+        }
         return result;
     }
 }

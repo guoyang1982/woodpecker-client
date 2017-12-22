@@ -7,7 +7,11 @@ import com.gy.woodpecker.textui.TTree;
 import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import java.lang.instrument.Instrumentation;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -22,7 +26,8 @@ import static com.gy.woodpecker.tools.GaStringUtils.tranClassName;
 @Slf4j
 @Cmd(name = "trace", sort = 14, summary = "Display the detailed thread stack of specified class and method",
         eg = {
-                "trace org.apache.commons.lang.StringUtils isBlank"
+                "trace org.apache.commons.lang.StringUtils isBlank",
+                "trace org.apache.commons.lang.StringUtils isBlank cost>5"
         })
 public class TraceCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
@@ -30,6 +35,10 @@ public class TraceCommand extends AbstractCommand {
 
     @IndexArg(index = 1, name = "method-pattern", summary = "Method of Pattern Matching")
     private String methodPattern;
+
+    @IndexArg(index = 2, name = "condition-express", isRequired = false,
+            summary = "Conditional expression")
+    private String conditionExpress;
 
     @Override
     public boolean getIfEnhance() {
@@ -44,6 +53,7 @@ public class TraceCommand extends AbstractCommand {
     private final AtomicInteger timesRef = new AtomicInteger();
     private final InvokeCost invokeCost = new InvokeCost();
     private final ThreadLocal<Trace> traceRef = new ThreadLocal<Trace>();
+    ScriptEngineManager manager = new ScriptEngineManager();
 
     @Override
     public boolean excute(Instrumentation inst) {
@@ -104,13 +114,36 @@ public class TraceCommand extends AbstractCommand {
         }
         //合并输出最终结果
         final Long cost = invokeCost.cost();
-        final Trace traceR = traceRef.get();
-        String result = traceR.tTree.rendering();
-        if (cost != null) {
-            result = result.replaceFirst("costTime", String.valueOf(cost));
 
+        if(StringUtils.isNotBlank(conditionExpress)){
+            //符合表达式时间的才输出
+            ScriptEngine engine = manager.getEngineByName("js");
+            engine.put("cost", cost);
+            try {
+                Boolean res =(Boolean)engine.eval(conditionExpress);
+                if(res.booleanValue()){
+                    final Trace traceR = traceRef.get();
+                    String result = traceR.tTree.rendering();
+                    if (cost != null) {
+                        result = result.replaceFirst("costTime", String.valueOf(cost));
+
+                    }
+                    ctxT.writeAndFlush(result);
+                }
+
+            } catch (ScriptException e) {
+                e.printStackTrace();
+            }
+        }else {
+            final Trace traceR = traceRef.get();
+            String result = traceR.tTree.rendering();
+            if (cost != null) {
+                result = result.replaceFirst("costTime", String.valueOf(cost));
+
+            }
+            ctxT.writeAndFlush(result);
         }
-        ctxT.writeAndFlush(result);
+
     }
 
 
@@ -154,6 +187,19 @@ public class TraceCommand extends AbstractCommand {
 
         private Trace(TTree tTree) {
             this.tTree = tTree;
+        }
+    }
+
+    public static  void main(String args[]){
+        String str = "a >= 0";
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("js");
+        engine.put("a", -1);
+        try {
+            Object result = engine.eval(str);
+            System.out.println(result);
+        } catch (ScriptException e) {
+            e.printStackTrace();
         }
     }
 }

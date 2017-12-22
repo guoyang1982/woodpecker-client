@@ -177,6 +177,14 @@ public class AdviceWeaver {
 
     }
 
+    /**
+     * 打印方法里的变量
+     * @param adviceId
+     * @param loader
+     * @param className
+     * @param methodName
+     * @param printTarget
+     */
     public static void printMethod(int adviceId,
                                    ClassLoader loader, String className, String methodName,
                                    Object printTarget){
@@ -193,7 +201,6 @@ public class AdviceWeaver {
 
     /**
      * 方法内部调用(异常返回)
-     *
      * @param adviceId       通知ID
      * @param lineNumber     代码行号
      * @param owner          调用类名

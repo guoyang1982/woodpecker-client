@@ -84,13 +84,8 @@ public class SpyTransformer implements ClassFileTransformer {
         try {
             ClassPool cp = ClassPool.getDefault();
             CtClass cc = null;
-            //try {
             cp.insertClassPath(new LoaderClassPath(loader));
             cc = cp.get(className);
-//            } catch (NotFoundException e) {
-//                cp.insertClassPath(new LoaderClassPath(loader));
-//                cc = cp.get(className);
-//            }
             byteCode = aopLog(loader, cc, className, byteCode);
         } catch (Exception ex) {
             log.info("the applog exception:{}", ex);
@@ -120,7 +115,6 @@ public class SpyTransformer implements ClassFileTransformer {
         }
         return byteCode;
     }
-
 
     /*
     * dump class to file
