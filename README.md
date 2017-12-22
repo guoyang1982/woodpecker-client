@@ -34,17 +34,39 @@
  
     进去后，输入help，可以看到所有命令和命令的解释。主要控制项为：心跳检查redis开关，线程池队列监控，发送消息开关，日志级别控制，jvm信息展示，
     内存使用信息展示，耗时线程栈展示，跟踪类方法耗时调用信息，查看类方法入参和返回值，查看已加载类详细信息，查看已加载类的方法，查看方法的堆栈信息。
-## 6.命令举例
+## 6.主要命令举例
 ### 1.help命令
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
 查看详细命令：
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help1.jpg)
 
-### 1.trace命令
+### 1.loglevel命令
+如下设置root级别为debug,设置com.gy.woo.classname打印日志级别为debug
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/loglevel.jpg)
+
+### 2.trace命令
 查看方法调用路径和耗时
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
+
+### 3.watch命令
+
+### 4.invoke命令
+
+### 5.sc 命令
+
+### 6.sm命令
+
+### 7.jvm命令
+
+### 8.top命令
+
+### 9.memory命令
+
+### 10.stack命令
+
+### 11.print命令
 
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
