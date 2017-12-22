@@ -27,12 +27,34 @@
     加入以下配置到 /conf/resin.xml:
     <jvm-arg>-javaagent:/jar包路径/wpclient-agent.jar=/配置文件路径/woodpecker.properties</jvm-arg>
 ## 5.远程控制
-    ### 客户端开了一个端口，可以用telnet进行远程控制，端口号可以在配置文件里配置，远程可以修改配置文件里的必要信息，命令：
+   ### 客户端开了一个端口，可以用telnet进行远程控制，端口号可以在配置文件里配置，远程可以修改配置文件里的必要信息，命令：
       telnet ip port
-    ### 推荐用客户端：
+   ### 推荐用客户端：
       ./woodpecker-run.sh ip port
-      进去后，输入help，可以看到所有命令和命令的解释。主要控制项为：心跳检查redis开关，线程池队列监控，发送消息开关，日志级别控制，jvm信息展示，
-    内存使用信息展示，耗时线程栈展示，跟踪类方法耗时调用信息，查看类方法入参和返回值，查看已加载类详细信息，查看已加载类的方法，查看方法的堆栈信息。
+ 
+    进去后，输入help，可以看到所有命令和命令的解释。主要控制项为：心跳检查redis开关，线程池队列监控，发送消息开关，日志级别控制，jvm信息展示，
+    内存使用信息展示，耗时线程栈展示，跟踪类方法耗时调用信息，查看类方法入参和返回值，查看已加载类详细信息，查看已加载类的方法，查看方法的堆栈信息。
+## 6.命令举例
+
+### 1.trace命令
+   `wp>trace com.*.sched.controller.AppInfoController index
+     Press Ctrl+D to abort.
+     `---+Tracing for : thread_name="http-nio-8081-exec-4" thread_id=0x30;is_daemon=true;priority=5;
+         `---+[9,9ms]com.*.sched.controller.AppInfoController:index(11)
+             +---[0,0ms]org.slf4j.Logger:info(@40)
+             +---[0,0ms]org.slf4j.Logger:debug(@41)
+             +---[1,1ms]org.slf4j.Logger:error(@42)
+             +---[1,0ms]com.*.sched.service.AppInfoServer:getLists(@43)
+             +---[1,0ms]java.lang.String:equals(@47)[throw java.lang.NullPointerException]
+             +---[8,7ms]org.slf4j.Logger:info(@53)
+             +---[8,0ms]org.springframework.web.context.request.RequestContextHolder:getRequestAttributes(@54)
+             +---[8,0ms]org.springframework.web.context.request.ServletRequestAttributes:getRequest(@54)
+             +---[8,0ms]java.io.PrintStream:println(@57)
+             +---[8,0ms]com.*.sched.service.Tlog:getT(@60)
+             +---[8,0ms]org.slf4j.Logger:debug(@61)
+             `---[8,0ms]org.slf4j.Logger:error(@62)`
+
+
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
     ，还有wp-web是web服务，可以按照用户注册应用并添加报警邮件信息，监听每个应用，可以看到自己权限下的应用的异常详细信息，并按异常类型汇总，提供报表图进行统计。
