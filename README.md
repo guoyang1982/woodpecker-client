@@ -36,8 +36,7 @@
     内存使用信息展示，耗时线程栈展示，跟踪类方法耗时调用信息，查看类方法入参和返回值，查看已加载类详细信息，查看已加载类的方法，查看方法的堆栈信息。
 ## 6.命令举例
 ### 1.help命令
-
-(https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
 
 
 ### 1.trace命令
