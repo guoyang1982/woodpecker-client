@@ -50,6 +50,10 @@ public abstract class AbstractCommand implements Command{
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
     }
+    @Override
+    public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
+                             Object target, Object[] args,Throwable returnObject){
+    }
 
     @Override
     public void invokeBeforeTracing(int lineNumber, String owner, String name, String desc){

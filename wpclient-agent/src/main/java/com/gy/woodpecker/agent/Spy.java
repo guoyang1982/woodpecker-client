@@ -52,6 +52,18 @@ public class Spy {
         }
     }
 
+    public static void methodOnThrowingEnd(int adviceId,
+                                           ClassLoader loader, String className, String methodName, String methodDesc,
+                                           Object target, Object[] args,Throwable returnObject){
+        try {
+            ON_THROWS_METHOD.invoke(null, adviceId,loader,className,methodName, methodDesc,target,args,returnObject);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 方法内部调用开始
      *

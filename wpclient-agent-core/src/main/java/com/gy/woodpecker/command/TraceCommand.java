@@ -91,6 +91,10 @@ public class TraceCommand extends AbstractCommand {
     @Override
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
+        printResult();
+    }
+
+    private void printResult() {
         final Trace trace = traceRef.get();
         if (null == trace) {
             return;
@@ -107,6 +111,14 @@ public class TraceCommand extends AbstractCommand {
 
         }
         ctxT.writeAndFlush(result);
+    }
+
+
+    @Override
+    public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
+                                Object target, Object[] args,Throwable returnObject){
+
+        printResult();
     }
 
     @Override

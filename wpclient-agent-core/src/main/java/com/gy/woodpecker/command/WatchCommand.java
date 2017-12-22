@@ -89,14 +89,40 @@ public class WatchCommand extends AbstractCommand{
         ctxT.writeAndFlush(tTable.rendering());
     }
 
+    @Override
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
+
+        printReturn(className, methodName, args, returnObject);
+    }
+
+    @Override
+    public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
+                                Object target, Object[] args,Throwable returnObject){
+
         final TKv tKv = new TKv(
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(TTable.Align.LEFT));
         tKv.add("className",className);
         tKv.add("methodName",methodName);
-        tKv.add("patameter",JSON.toJSONString(args));
+        tKv.add("patameter", JSON.toJSONString(args));
+        tKv.add("return",returnObject.toString());
+
+        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
+                new TTable.ColumnDefine()
+        });
+
+        tTable.addRow(tKv.rendering());
+        ctxT.writeAndFlush(tTable.rendering());
+    }
+
+    private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
+        final TKv tKv = new TKv(
+                new TTable.ColumnDefine(TTable.Align.RIGHT),
+                new TTable.ColumnDefine(TTable.Align.LEFT));
+        tKv.add("className",className);
+        tKv.add("methodName",methodName);
+        tKv.add("patameter", JSON.toJSONString(args));
         tKv.add("return",JSON.toJSONString(returnObject));
 
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
@@ -106,4 +132,5 @@ public class WatchCommand extends AbstractCommand{
         tTable.addRow(tKv.rendering());
         ctxT.writeAndFlush(tTable.rendering());
     }
+
 }

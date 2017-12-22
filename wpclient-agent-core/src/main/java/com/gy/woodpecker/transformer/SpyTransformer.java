@@ -154,6 +154,7 @@ public class SpyTransformer implements ClassFileTransformer {
         System.out.println("进行插桩类:" + className);
         String classLoad = className + ".class.getClassLoader()";
 
+
         //先在before之前做子函数调用增强，以免把before增强的代码给增强
         if (command.getCommandType().equals(CommandEnum.TRACE)) {
             m.instrument(new ExprEditor() {
@@ -176,6 +177,22 @@ public class SpyTransformer implements ClassFileTransformer {
             });
         }
 
+        //插入addcatch,这里的不需要插入自己的间谍分析代码，但是要获取异常信息和返回信息
+        if (afterMethod) {
+            StringBuffer afterThrowsBody = new StringBuffer();
+
+            CtClass etype = null;
+            try {
+                etype = ClassPool.getDefault().get("java.lang.Exception");
+            } catch (NotFoundException e) {
+                e.printStackTrace();
+            }
+            afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$e);");
+
+            m.addCatch("{"+afterThrowsBody.toString()+"; throw $e; }", etype);
+        }
+
+
         if (command.getCommandType().equals(CommandEnum.TRACE)) {
             m.instrument(new ExprEditor() {
                 public void edit(Handler h)
@@ -187,7 +204,9 @@ public class SpyTransformer implements ClassFileTransformer {
                     String throwException = "$1";
                     String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeThrowTracing("
                             + command.getSessionId() + "," + lineNumber + ",\"" + clazzName + "\",\"" + methodName + "\",\"" + methodDes + "\",$1);";
-                    h.insertBefore(before);
+                    if(!h.isFinally()){
+                        h.insertBefore(before);
+                    }
                 }
             });
         }
@@ -212,12 +231,7 @@ public class SpyTransformer implements ClassFileTransformer {
             afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
             m.insertAfter(afterBody.toString());
         }
-//        if(throwMethod){
-//            m.addCatch("", CtClass.);
-//        }
-
     }
-
 
 }
 

@@ -63,6 +63,9 @@ public interface Command {
     void after(ClassLoader loader, String className, String methodName, String methodDesc,
                               Object target, Object[] args,Object returnObject) throws Throwable;
 
+    void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
+                             Object target, Object[] args,Throwable returnObject);
+
     void invokeBeforeTracing(int lineNumber, String owner, String name, String desc);
 
     void invokeAfterTracing(int lineNumber, String owner, String name, String desc);

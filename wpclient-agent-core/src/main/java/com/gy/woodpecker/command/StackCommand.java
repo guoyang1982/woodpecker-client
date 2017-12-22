@@ -77,4 +77,12 @@ public class StackCommand extends AbstractCommand {
 
         ctxT.writeAndFlush(stackInfoRef.get());
     }
+
+    @Override
+    public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
+                                Object target, Object[] args,Throwable returnObject){
+
+        ctxT.writeAndFlush(stackInfoRef.get());
+    }
+
 }

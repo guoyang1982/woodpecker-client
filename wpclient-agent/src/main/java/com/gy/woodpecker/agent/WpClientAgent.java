@@ -62,7 +62,7 @@ public class WpClientAgent {
             classOfNetty.getMethod("init").invoke(null);
             // 获取各种Hook
             final Class<?> adviceWeaverClass = classLoader.loadClass("com.gy.woodpecker.weaver.AdviceWeaver");
-            // 初始化间谍
+            // 初始化间谍methodOnThrowingEnd
             Spy.initForAgentLauncher(
                     classLoader,
                     adviceWeaverClass.getMethod("methodOnBegin",
@@ -82,7 +82,15 @@ public class WpClientAgent {
                             Object.class,
                             Object[].class,
                             Object.class),
-                    null,
+                    adviceWeaverClass.getMethod("methodOnThrowingEnd",
+                            int.class,
+                            ClassLoader.class,
+                            String.class,
+                            String.class,
+                            String.class,
+                            Object.class,
+                            Object[].class,
+                            Throwable.class),
                     adviceWeaverClass.getMethod("methodOnInvokeBeforeTracing",
                             int.class,
                             int.class,

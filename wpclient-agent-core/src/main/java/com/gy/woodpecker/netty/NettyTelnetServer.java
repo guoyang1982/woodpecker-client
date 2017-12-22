@@ -62,8 +62,6 @@ public class NettyTelnetServer {
         // 绑定对应的端口号,并启动开始监听端口上的连接
         Channel ch = serverBootstrap.bind(PORT).sync().channel();
 
-        // 等待关闭,同步端口
-        //ch.closeFuture().sync();
     }
 
     public void close() {

@@ -85,6 +85,25 @@ public class AdviceWeaver {
 
     }
 
+    public static  void methodOnThrowingEnd(int adviceId,
+                        ClassLoader loader, String className, String methodName, String methodDesc,
+                        Object target, Object[] args,Throwable returnObject){
+        if (!advices.containsKey(adviceId)) {
+            return;
+        }
+        try {
+
+            Command command = advices.get(adviceId);
+            // 获取通知器并做后置异常通知
+            command.afterOnThrowing(loader, className, methodName, methodDesc, target, args,returnObject);
+
+        } catch (Exception e){
+            log.error("methodOnThrowingEnd fail!{}",e);
+        }
+
+    }
+
+
     /**
      * 方法内部调用开始
      *
