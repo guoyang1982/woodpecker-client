@@ -37,11 +37,14 @@
 ## 6.命令举例
 ### 1.help命令
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
-
+查看详细命令：
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help1.jpg)
 
 ### 1.trace命令
-
-
+查看方法调用路径和耗时
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
+根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
 
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
