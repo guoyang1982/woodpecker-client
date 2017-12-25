@@ -35,6 +35,7 @@
     进去后，输入help，可以看到所有命令和命令的解释。主要控制项为：心跳检查redis开关，线程池队列监控，发送消息开关，日志级别控制，jvm信息展示，
     内存使用信息展示，耗时线程栈展示，跟踪类方法耗时调用信息，查看类方法入参和返回值，查看已加载类详细信息，查看已加载类的方法，查看方法的堆栈信息。
 ## 6.主要命令举例
+  客户端支持命令补全(tab),还有历史记录(上下建)。
 ### 1.help命令
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
 查看详细命令：
@@ -49,16 +50,26 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
+说明：
+    []前面是到本方法的耗时，后面的是本方法的耗时，@后面是行号，第一条括号里面的是总共耗时。
+    trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。
 
 ### 3.watch命令
+如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。
+
 
 ### 4.invoke命令
+方法调用命令，可以在客户端远程调用应用内的方法。
 
 ### 5.sc 命令
+查询类的详细信息，如类有哪些的加载器，类的静态属性值等。
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/class.jpg)
 
 ### 6.sm命令
+查询类的某个方法的详细信息。
 
 ### 7.jvm命令
+查询jvm的详细信息。
 
 ### 8.top命令
 
