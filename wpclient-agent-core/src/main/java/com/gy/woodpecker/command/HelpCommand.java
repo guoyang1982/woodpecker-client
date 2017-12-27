@@ -53,7 +53,6 @@ public class HelpCommand extends AbstractCommand{
 
             final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                     new TTable.ColumnDefine(),
-                    new TTable.ColumnDefine(),
                     new TTable.ColumnDefine()
             });
 
@@ -62,11 +61,11 @@ public class HelpCommand extends AbstractCommand{
                 if (clazz.isAnnotationPresent(Cmd.class)) {
                     final Cmd cmd = clazz.getAnnotation(Cmd.class);
                     if (!cmd.isHacking()) {
-                        StringBuffer str = new StringBuffer();
-                        for(String s:cmd.eg()){
-                            str.append(s).append("\r\n");
-                        }
-                        tTable.addRow(cmd.name(), cmd.summary(),str.toString());
+//                        StringBuffer str = new StringBuffer();
+//                        for(String s:cmd.eg()){
+//                            str.append(s).append("\r\n");
+//                        }
+                        tTable.addRow(cmd.name(), cmd.summary());
                     }
                 }
             }
