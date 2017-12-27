@@ -113,7 +113,7 @@ public class WatchCommand extends AbstractCommand{
         });
 
         tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tTable.rendering());
+        ctxT.writeAndFlush(tKv.rendering());
     }
 
     private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
@@ -130,7 +130,7 @@ public class WatchCommand extends AbstractCommand{
         });
 
         tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tTable.rendering());
+        ctxT.writeAndFlush(tKv.rendering());
     }
 
 }
