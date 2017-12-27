@@ -127,6 +127,6 @@ public class PrintValueCommand extends AbstractCommand{
         });
 
         tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tTable.rendering());
+        ctxT.writeAndFlush(tKv.rendering());
     }
 }
