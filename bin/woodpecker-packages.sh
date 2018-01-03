@@ -15,7 +15,6 @@ exit_on_err()
     exit ${1}
 }
 
-# maven package the greys
 mvn clean package -Dmaven.test.skip=true -f ../pom.xml \
 || exit_on_err 1 "package woodpecker failed."
 
@@ -34,7 +33,6 @@ chmod 777 ./woodpecker-launch.sh
 cp ./woodpecker-run.sh ${WOODPECKER_TARGET_DIR}
 cp ./woodpecker-launch.sh ${WOODPECKER_TARGET_DIR}
 
-# zip the greys
 cd ../target/
 zip -r wpclient-agent.zip wpclient-agent/
 cd -

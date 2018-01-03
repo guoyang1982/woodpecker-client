@@ -1,11 +1,14 @@
 package com.gy.woodpecker.command;
 
 import com.alibaba.fastjson.JSON;
+import com.google.gson.Gson;
+import com.gy.woodpecker.Advice;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
+import com.gy.woodpecker.textui.ext.TObject;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -24,6 +27,8 @@ import java.lang.instrument.UnmodifiableClassException;
         eg = {
                 "watch -p org.apache.commons.lang.StringUtils isBlank",
                 "watch -r org.apache.commons.lang.StringUtils isBlank",
+                "watch -rj org.apache.commons.lang.StringUtils isBlank",
+                "watch -rx 2 org.apache.commons.lang.StringUtils isBlank"
         })
 public class WatchCommand extends AbstractCommand{
 
@@ -38,6 +43,12 @@ public class WatchCommand extends AbstractCommand{
 
     @NamedArg(name = "r", summary = "Watch the return")
     private boolean isReturn = false;
+
+    @NamedArg(name = "x", hasValue = true, summary = "Expand level of object (0 by default)")
+    private Integer expend;
+
+    @NamedArg(name = "j", summary = "use json")
+    private boolean isUsingJson = false;
 
     @Override
     public boolean getIfEnhance() {
@@ -74,19 +85,9 @@ public class WatchCommand extends AbstractCommand{
 
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
 
-        final TKv tKv = new TKv(
-                new TTable.ColumnDefine(TTable.Align.RIGHT),
-                new TTable.ColumnDefine(TTable.Align.LEFT));
-        tKv.add("className",className);
-        tKv.add("methodName",methodName);
-        tKv.add("patameter",JSON.toJSONString(args));
+        Advice advice = new Advice(null,className,methodName,args,null,null);
 
-        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                new TTable.ColumnDefine()
-        });
-
-        tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tTable.rendering());
+        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
 
     @Override
@@ -100,37 +101,14 @@ public class WatchCommand extends AbstractCommand{
     public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
                                 Object target, Object[] args,Throwable returnObject){
 
-        final TKv tKv = new TKv(
-                new TTable.ColumnDefine(TTable.Align.RIGHT),
-                new TTable.ColumnDefine(TTable.Align.LEFT));
-        tKv.add("className",className);
-        tKv.add("methodName",methodName);
-        tKv.add("patameter", JSON.toJSONString(args));
-        tKv.add("return",returnObject.toString());
-
-        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                new TTable.ColumnDefine()
-        });
-
-        tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tKv.rendering());
+        Advice advice = new Advice(null,className,methodName,args,null,returnObject);
+        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
 
     private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
-        final TKv tKv = new TKv(
-                new TTable.ColumnDefine(TTable.Align.RIGHT),
-                new TTable.ColumnDefine(TTable.Align.LEFT));
-        tKv.add("className",className);
-        tKv.add("methodName",methodName);
-        tKv.add("patameter", JSON.toJSONString(args));
-        tKv.add("return",JSON.toJSONString(returnObject));
 
-        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                new TTable.ColumnDefine()
-        });
-
-        tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tKv.rendering());
+        Advice advice = new Advice(null,className,methodName,args,returnObject,null);
+        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
 
 }

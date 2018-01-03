@@ -46,8 +46,6 @@ public class TKv implements TComponent {
     /*
      * 出现多余的空行的原因是，KVview在输出时，会补全空格到最长的长度。所以在"yyyyy”后面会多出来很多的空格。
      * 再经过TableView的固定列处理，多余的空格就会在一行里放不下，输出成两行（第二行前面是空格）
-     *
-     * @see https://github.com/oldmanpushcart/greys-anatomy/issues/82
      */
     private String filterEmptyLine(String content) {
         final StringBuilder sb = new StringBuilder();
@@ -75,23 +73,5 @@ public class TKv implements TComponent {
 //        return content;
     }
 
-    public static void main(String... args) {
-
-        final TKv tKv = new TKv(
-                new TTable.ColumnDefine(TTable.Align.RIGHT),
-                new TTable.ColumnDefine(10,false, TTable.Align.LEFT));
-        tKv.add("KEY-1","ABCDEFGHIJKLMNOPQRSTUVWXYZ");
-        tKv.add("KEY-2","1234567890");
-        tKv.add("KEY-3","1234567890");
-
-        final TTable tTable = new TTable(new TTable.ColumnDefine[]{
-                new TTable.ColumnDefine(),
-                new TTable.ColumnDefine()
-        });
-
-        tTable.addRow("OPTIONS", " asdftttttttttttttttttttttttttttttttttttttttttrrrrrrrrr\r\nddddddrrrrrrrrrrrrrrrrrrr\r\n");
-
-        System.out.println(tTable.rendering());
-    }
 
 }
