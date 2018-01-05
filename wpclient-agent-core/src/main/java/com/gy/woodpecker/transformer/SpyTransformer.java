@@ -19,6 +19,8 @@ import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.*;
 
+import static java.io.File.separatorChar;
+import static java.lang.System.getProperty;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 
 /**
@@ -33,6 +35,7 @@ public class SpyTransformer implements ClassFileTransformer {
 
     public final static Map<Integer, List> classNameCache
             = new HashMap<Integer, List>();
+    private static final String WORKING_DIR = getProperty("user.home");
 
     String methodName;
     boolean beforeMethod;
@@ -111,7 +114,7 @@ public class SpyTransformer implements ClassFileTransformer {
         }
         cc.detach();
         if (ContextConfig.isdumpClass) {
-            dumpClassIfNecessary("./woodpecker-class-dump/" + className, byteCode);
+            dumpClassIfNecessary(WORKING_DIR + separatorChar + "woodpecker-class-dump/" + className, byteCode);
         }
         return byteCode;
     }
@@ -181,7 +184,12 @@ public class SpyTransformer implements ClassFileTransformer {
             } catch (NotFoundException e) {
                 e.printStackTrace();
             }
-            afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$e);");
+            // 判断是否为静态方法
+            if(Modifier.isStatic(m.getModifiers())){
+                afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,$e);");
+            }else{
+                afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$e);");
+            }
 
             m.addCatch("{"+afterThrowsBody.toString()+"; throw $e; }", etype);
         }
@@ -215,14 +223,25 @@ public class SpyTransformer implements ClassFileTransformer {
         StringBuffer beforeBody = new StringBuffer();
 
         if (beforeMethod) {
-            beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
+            // 判断是否为静态方法
+            if(Modifier.isStatic(m.getModifiers())){
+                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args);");
+            }else{
+                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
+            }
             m.insertBefore(beforeBody.toString());
         }
 
         StringBuffer afterBody = new StringBuffer();
 
         if (afterMethod) {
-            afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
+            // 判断是否为静态方法
+            if(Modifier.isStatic(m.getModifiers())){
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,$_);");
+
+            }else{
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
+            }
             m.insertAfter(afterBody.toString());
         }
     }
