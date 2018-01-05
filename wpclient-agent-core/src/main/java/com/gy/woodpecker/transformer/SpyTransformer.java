@@ -173,6 +173,17 @@ public class SpyTransformer implements ClassFileTransformer {
                 }
             });
         }
+        //尽量在前面做before操作 这样能得到准确的入参信息
+        StringBuffer beforeBody = new StringBuffer();
+        if (beforeMethod) {
+            // 判断是否为静态方法
+            if(Modifier.isStatic(m.getModifiers())){
+                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args);");
+            }else{
+                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
+            }
+            m.insertBefore(beforeBody.toString());
+        }
 
         //插入addcatch,这里的不需要插入自己的间谍分析代码，但是要获取异常信息和返回信息
         if (afterMethod) {
@@ -220,17 +231,6 @@ public class SpyTransformer implements ClassFileTransformer {
 
         }
 
-        StringBuffer beforeBody = new StringBuffer();
-
-        if (beforeMethod) {
-            // 判断是否为静态方法
-            if(Modifier.isStatic(m.getModifiers())){
-                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args);");
-            }else{
-                beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
-            }
-            m.insertBefore(beforeBody.toString());
-        }
 
         StringBuffer afterBody = new StringBuffer();
 
