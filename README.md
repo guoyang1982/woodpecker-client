@@ -61,7 +61,6 @@
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-r.jpg)
 
-
 ### 4.invoke命令
 方法调用命令，可以在客户端远程调用应用内的方法。
 
@@ -81,6 +80,7 @@
 查看内存占用情况
 ### 10.stack命令
 查看方法的线程栈，当不知道方法的调用路径时，这个比较不错，尤其对二方包等。
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/stack.jpg)
 ### 11.print命令
 pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。
 适合：服务在启动后，出现问题急切需要知道变量的值而不需要重新打印log日志重启服务。
