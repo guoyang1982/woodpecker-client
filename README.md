@@ -59,6 +59,7 @@
 参数p是返回所有入参，x是层次展示
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-p.jpg)
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-r.jpg)
 
 
 ### 4.invoke命令
