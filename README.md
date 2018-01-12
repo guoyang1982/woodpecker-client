@@ -57,26 +57,8 @@
 ### 3.watch命令
 如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。
 参数p是返回所有入参，x是层次展示
-wp>watch -px 2 com.*.ope.controller.VideoController uploadInit
-Press Ctrl+D to abort.
-@Advice[
-    loader=null,
-    target=@String[com.letv.*.controller.VideoController],
-    params=@Object[][
-        @String[乐视法国潘神头等舱沙发],
-        @String[],
-        @String[],
-        @Integer[-1],
-        @Integer[0],
-        @String[92a4d9c47e47ee677d78be6c2f7c63fba108fc85251244109],
-        @Integer[4],
-        @HttpServletRequestImpl[HttpServletRequestImpl[HttpRequest[default, 121]]],
-        @String[jQuery1124007337425951845944_1515740295419],
-    ],
-    returnObj=null,
-    throwExp=null,
-    methodName=@String[uploadInit],
-]
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-p.jpg)
+参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
 
 
 ### 4.invoke命令
