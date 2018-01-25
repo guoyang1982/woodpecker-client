@@ -57,7 +57,7 @@
 ### 3.watch命令
 如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。
 参数p是返回所有入参，x是层次展示
-![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-p.jpg)
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-px.jpg)
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-r.jpg)
 
@@ -97,8 +97,6 @@ user:要打印的变量
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
     ，还有wp-web是web服务，可以按照用户注册应用并添加报警邮件信息，监听每个应用，可以看到自己权限下的应用的异常详细信息，并按异常类型汇总，提供报表图进行统计。
-   
-   
 
 
 
