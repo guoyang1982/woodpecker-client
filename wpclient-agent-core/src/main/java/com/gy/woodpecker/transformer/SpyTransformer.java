@@ -1,5 +1,6 @@
 package com.gy.woodpecker.transformer;
 
+import com.alibaba.fastjson.JSON;
 import com.gy.woodpecker.command.Command;
 import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.enumeration.CommandEnum;
@@ -235,12 +236,28 @@ public class SpyTransformer implements ClassFileTransformer {
         StringBuffer afterBody = new StringBuffer();
 
         if (afterMethod) {
+            Object result = "$_";
+
+            try {
+                CtClass cc = m.getReturnType();
+                String retype = cc.getName();
+
+                if(retype.equals("boolean") || retype.equals("double") || retype.equals("int")
+                        || retype.equals("long") || retype.equals("float") || retype.equals("byte") || retype.equals("char")){
+
+                    result = "String.valueOf($_)";
+
+                }
+
+            } catch (NotFoundException e) {
+                e.printStackTrace();
+            }
             // 判断是否为静态方法
             if(Modifier.isStatic(m.getModifiers())){
-                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,$_);");
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,"+result+");");
 
             }else{
-                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$_);");
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,"+result+");");
             }
             m.insertAfter(afterBody.toString());
         }

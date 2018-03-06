@@ -45,6 +45,9 @@ public class PrintValueCommand extends AbstractCommand{
     @NamedArg(name = "o", summary = "the vatiable is object")
     private boolean isObject = false;
 
+    @NamedArg(name = "b", summary = "the vatiable is boolean")
+    private boolean isBoolean = false;
+
     @NamedArg(name = "n", summary = "is not vatiable")
     private boolean isNo = false;
 
@@ -85,6 +88,9 @@ public class PrintValueCommand extends AbstractCommand{
                 }
                 if(isDouble){
                     variable = "Double.valueOf("+variable+")";
+                }
+                if(isBoolean){
+                    variable = "Boolean.valueOf("+variable+")";
                 }
                 if(isNo){
                     variable = "\""+variable+"\"";

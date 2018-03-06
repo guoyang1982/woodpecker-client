@@ -38,10 +38,10 @@ public class TObject implements TComponent {
     @Override
     public String rendering() {
         try {
+            if (isUsingJson) {
+                return new Gson().toJson(object);
+            }
             if (isNeedExpend()) {
-                if (isUsingJson) {
-                    return new Gson().toJson(object);
-                }
                 return toString(object, 0, expend);
             } else {
                 return newString(object);
