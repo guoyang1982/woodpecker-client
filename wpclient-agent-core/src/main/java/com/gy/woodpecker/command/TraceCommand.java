@@ -2,6 +2,7 @@ package com.gy.woodpecker.command;
 
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
+import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.enumeration.CommandEnum;
 import com.gy.woodpecker.textui.TTree;
 import com.gy.woodpecker.tools.InvokeCost;
@@ -27,7 +28,8 @@ import static com.gy.woodpecker.tools.GaStringUtils.tranClassName;
 @Cmd(name = "trace", sort = 14, summary = "Display the detailed thread stack of specified class and method",
         eg = {
                 "trace org.apache.commons.lang.StringUtils isBlank",
-                "trace org.apache.commons.lang.StringUtils isBlank cost>5"
+                "trace org.apache.commons.lang.StringUtils isBlank cost>5",
+                "trace -n 2 org.apache.commons.lang.StringUtils isBlank"
         })
 public class TraceCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
@@ -39,6 +41,9 @@ public class TraceCommand extends AbstractCommand {
     @IndexArg(index = 2, name = "condition-express", isRequired = false,
             summary = "Conditional expression")
     private String conditionExpress;
+
+    @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
+    private Integer threshold;
 
     @Override
     public boolean getIfEnhance() {
@@ -104,6 +109,11 @@ public class TraceCommand extends AbstractCommand {
         printResult();
     }
 
+    private boolean isOverThreshold(int currentTimes) {
+        return null != threshold
+                && currentTimes > threshold;
+    }
+
     private void printResult() {
         final Trace trace = traceRef.get();
         if (null == trace) {
@@ -115,6 +125,15 @@ public class TraceCommand extends AbstractCommand {
         //合并输出最终结果
         final Long cost = invokeCost.cost();
 
+        //调用次数判断
+        if(isOverThreshold(timesRef.incrementAndGet())){
+            //超过设置的调用次数 结束
+            timesRef.set(0);
+            ctxT.writeAndFlush("\n\0");
+            return;
+        }
+
+        //时间判断
         if(StringUtils.isNotBlank(conditionExpress)){
             //符合表达式时间的才输出
             ScriptEngine engine = manager.getEngineByName("js");

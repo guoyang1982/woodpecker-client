@@ -16,6 +16,7 @@ import org.slf4j.Logger;
 
 import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author guoyang
@@ -28,7 +29,8 @@ import java.lang.instrument.UnmodifiableClassException;
                 "watch -p org.apache.commons.lang.StringUtils isBlank",
                 "watch -r org.apache.commons.lang.StringUtils isBlank",
                 "watch -rj org.apache.commons.lang.StringUtils isBlank",
-                "watch -rx 2 org.apache.commons.lang.StringUtils isBlank"
+                "watch -rx 2 org.apache.commons.lang.StringUtils isBlank",
+                "watch -pn 6 org.apache.commons.lang.StringUtils isBlank"
         })
 public class WatchCommand extends AbstractCommand{
 
@@ -50,6 +52,9 @@ public class WatchCommand extends AbstractCommand{
     @NamedArg(name = "j", summary = "use json")
     private boolean isUsingJson = false;
 
+    @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
+    private Integer threshold;
+
     @Override
     public boolean getIfEnhance() {
         return true;
@@ -59,6 +64,8 @@ public class WatchCommand extends AbstractCommand{
     public boolean getIfAllNotify() {
         return true;
     }
+
+    private final AtomicInteger timesRef = new AtomicInteger();
 
     @Override
     public boolean excute(Instrumentation inst) {
@@ -82,10 +89,22 @@ public class WatchCommand extends AbstractCommand{
         super.isWait = true;
         return has;
     }
+    private boolean isOverThreshold(int currentTimes) {
+        return null != threshold
+                && currentTimes > threshold;
+    }
 
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
 
         Advice advice = new Advice(null,className,methodName,args,null,null);
+
+        //调用次数判断
+        if(isOverThreshold(timesRef.incrementAndGet())){
+            //超过设置的调用次数 结束
+            timesRef.set(0);
+            ctxT.writeAndFlush("\n\0");
+            return;
+        }
 
         ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
@@ -93,6 +112,14 @@ public class WatchCommand extends AbstractCommand{
     @Override
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
+
+        //调用次数判断
+        if(isOverThreshold(timesRef.incrementAndGet())){
+            //超过设置的调用次数 结束
+            timesRef.set(0);
+            ctxT.writeAndFlush("\n\0");
+            return;
+        }
 
         printReturn(className, methodName, args, returnObject);
     }
