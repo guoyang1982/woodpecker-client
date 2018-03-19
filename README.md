@@ -41,11 +41,11 @@
 查看详细命令：
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help1.jpg)
 
-### 1.loglevel命令
+### 2.loglevel命令
 如下设置root级别为debug,设置com.gy.woo.classname打印日志级别为debug
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/loglevel.jpg)
 
-### 2.trace命令
+### 3.trace命令
 查看方法调用路径和耗时
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
@@ -54,37 +54,39 @@
     []前面是到本方法的耗时，后面的是本方法的耗时，@后面是行号，第一条括号里面的是总共耗时。
     trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。
 
-### 3.watch命令
+### 4.watch命令
 如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。
 参数p是返回所有入参，x是层次展示
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-px.jpg)
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-r.jpg)
 
-### 4.invoke命令
+### 5.invoke命令
 方法调用命令，可以在客户端远程调用应用内的方法。
 
-### 5.sc 命令
+### 6.sc 命令
 查询类的详细信息，如类有哪些的加载器，类的静态属性值等。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/class.jpg)
 
-### 6.sm命令
+### 7.sm命令
 查询类的某个方法的详细信息。
 
-### 7.jvm命令
+### 8.jvm命令
 查询jvm的详细信息。
 
-### 8.top命令
+### 9.top命令
 查看应用线程占用cpu时间，能够排查占用cpu时间最大的线程栈，进而追踪到有问题的代码
-### 9.memory命令
+### 10.memory命令
 查看内存占用情况
-### 10.stack命令
+### 11.stack命令
 查看方法的线程栈，当不知道方法的调用路径时，这个比较不错，尤其对二方包等。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/stack.jpg)
-### 11.print命令
+### 12.print命令
 pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。
 适合：服务在启动后，出现问题急切需要知道变量的值而不需要重新打印log日志重启服务。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/print.jpg)
+### 13.monitor监控命令
+监控命令,监控接口调用率。
 
 说明：
 print：命令名
