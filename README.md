@@ -85,9 +85,6 @@
 pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。
 适合：服务在启动后，出现问题急切需要知道变量的值而不需要重新打印log日志重启服务。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/print.jpg)
-### 13.monitor监控命令
-监控命令,监控接口调用率。
-
 说明：
 print：命令名
 -o:为参数，支持其他参数 查 help print
@@ -95,6 +92,8 @@ com.*.ope.controller.*:类名 全路径 目前不支持正则匹配
 channelList:方法名
 80:插入代码的行号
 user:要打印的变量
+### 13.monitor监控命令
+监控命令,监控接口调用率。
 
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
