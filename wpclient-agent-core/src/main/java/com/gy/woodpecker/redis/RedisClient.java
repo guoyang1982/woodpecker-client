@@ -71,16 +71,16 @@ public class RedisClient {
     }
 
     public void set(String key, String value, int time) {
-        log.info("the key=" + key + ",the value=" + value + ":" + com.gy.woodpecker.log.Logstatic.test);
-        log.error("the key=" + key + ",the value=" + value);
+//        log.info("the key=" + key + ",the value=" + value + ":" + com.gy.woodpecker.log.Logstatic.test);
+//        log.error("the key=" + key + ",the value=" + value);
 
         jedisCluster.set(key, value);
         jedisCluster.expire(key, time);
     }
 
     public void rightPush(String key, String value) {
-        Logstatic.test = "1111111111gggggg";
-        log.info("the key=" + key + ",the value=" + value);
+//        Logstatic.test = "1111111111gggggg";
+//        log.info("the key=" + key + ",the value=" + value);
         jedisCluster.rpush(key, value);
     }
 
