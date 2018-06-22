@@ -9,6 +9,7 @@ import com.gy.woodpecker.message.MessageBean;
 import com.gy.woodpecker.redis.RedisClient;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import com.gy.woodpecker.tools.IPUtile;
+import com.gy.woodpecker.tools.MsgPackUtil;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import com.gy.woodpecker.transformer.WoodpeckTransformer;
 import lombok.extern.slf4j.Slf4j;
@@ -21,9 +22,7 @@ import java.lang.instrument.Instrumentation;
 import java.lang.instrument.UnmodifiableClassException;
 import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.*;
 
 /**
@@ -170,19 +169,59 @@ public class LoggerFacility {
         executorPools.execute(new Runnable() {
             public void run() {
                 try {
+
                     MessageBean messageBean = new MessageBean();
                     messageBean.setAppName(appName);
                     messageBean.setIp(IPUtile.getIntranetIP());
                     messageBean.setMsg(msg);
                     messageBean.setCreateTime(timeForNow());
 
-                    RedisClient.RedisClientInstance.rightPush(appName, JSONObject.toJSONString(messageBean));
+                    //RedisClient.RedisClientInstance.rightPush(appName, JSONObject.toJSONString(messageBean));
+                    byte[] msg = MsgPackUtil.toBytes(messageBean);
+                    RedisClient.RedisClientInstance.rightPushBytes(appName,msg);
                 } catch (Exception e) {
                     log.info("发送异常日志消息失败!" + e.getMessage());
                 }
 
             }
         });
+    }
+
+    public static void main(String args[]) throws Exception{
+        // Create serialize objects.
+//        List<String> src = new ArrayList<String>();
+//        src.add("msgpack");
+//        src.add("kumofs");
+//        src.add("viver");
+
+// Serialize
+//        byte[] raw = msgpack.write(src);
+
+// Deserialize directly using a template
+//        List<String> dst1 = msgpack.read(raw, Templates.tList(Templates.TString));
+//        System.out.println(dst1.get(0));
+//        System.out.println(dst1.get(1));
+//        System.out.println(dst1.get(2));
+
+// Or, Deserialze to Value then convert type.
+//        Value dynamic = msgpack.read(raw);
+//        List<String> dst2 = new Converter(dynamic)
+//                .read(Templates.tList(Templates.TString));
+//        System.out.println(dst2.get(0));
+//        System.out.println(dst2.get(1));
+//        System.out.println(dst2.get(2));
+
+        MessageBean messageBean = new MessageBean();
+        messageBean.setAppName("lms");
+        messageBean.setIp(IPUtile.getIntranetIP());
+        messageBean.setMsg("ssssssssdffg");
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Date now = new Date();
+        //messageBean.setCreateTime(format.format(now));
+        byte[] raw1 = MsgPackUtil.toBytes(messageBean);
+        System.out.println(new String(raw1));
+        MessageBean obj = MsgPackUtil.toObject(raw1,MessageBean.class);
+        System.out.println(obj.getAppName());
     }
 
     private String timeForNow() {

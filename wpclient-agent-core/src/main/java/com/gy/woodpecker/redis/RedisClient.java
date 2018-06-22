@@ -78,6 +78,12 @@ public class RedisClient {
         jedisCluster.expire(key, time);
     }
 
+    public void rightPushBytes(String key, byte[] value) {
+        log.info("the key123=" + key);
+        jedisCluster.rpush(key.getBytes(), value);
+    }
+
+
     public void rightPush(String key, String value) {
 //        Logstatic.test = "1111111111gggggg";
 //        log.info("the key=" + key + ",the value=" + value);
