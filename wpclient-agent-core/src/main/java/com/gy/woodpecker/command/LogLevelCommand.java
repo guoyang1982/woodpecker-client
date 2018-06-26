@@ -74,6 +74,7 @@ public class LogLevelCommand extends AbstractCommand{
                 } catch (Exception e) {
                     log.info(e.getMessage());
                 }
+                break;
             }
         }
     }
@@ -99,6 +100,7 @@ public class LogLevelCommand extends AbstractCommand{
                 } catch (Exception e) {
                     log.info(e.getMessage());
                 }
+                break;
             }
         }
     }
