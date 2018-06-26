@@ -90,6 +90,7 @@ public class ResetCommand extends AbstractCommand {
                 // 批量增强
                 final Class<?>[] classArray = new Class<?>[classNameList.size()];
                 arraycopy(classNameList.toArray(), 0, classArray, 0, classNameList.size());
+                //重转 保存的Class信息，只要transform为null 就恢复了
                 inst.retransformClasses(classArray);
             }
 
