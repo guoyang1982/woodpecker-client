@@ -152,7 +152,7 @@ public class LoggerFacility {
      * @param msg
      */
     public void sendToRedis(final String msg) {
-        log.info("发送异常日志消息!" + msg);
+        //log.info("发送异常日志消息!" + msg);
 
         if (!slog) {
             log.info("客户端关闭了发送, 不处理操作!");
