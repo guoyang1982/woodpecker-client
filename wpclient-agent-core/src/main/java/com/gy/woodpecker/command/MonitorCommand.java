@@ -102,6 +102,8 @@ public class MonitorCommand extends AbstractCommand {
 
                     Data data;
                     while (true) {
+                        //一直循环 如果data没有被覆盖的话 值设置为new Data，并返回true，并输出结果
+                        //反之一直循环 直到不覆盖  是原子操作
                         data = value.get();
                         if (value.compareAndSet(data, new Data())) {
                             break;
@@ -250,7 +252,7 @@ public class MonitorCommand extends AbstractCommand {
                     nData.minCost = Math.min(oData.minCost, cost);
                 }
 
-
+                //原子操作和上面的一对  oData没有被修改的话 则值设置nData 判断变化都是oData引用
                 if (value.compareAndSet(oData, nData)) {
                     break;
                 }
