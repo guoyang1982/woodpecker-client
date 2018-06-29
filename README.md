@@ -94,6 +94,9 @@ channelList:方法名
 user:要打印的变量
 ### 13.monitor监控命令
 监控命令,监控接口调用率。
+参数：-c 时间秒
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/monitor.jpg)
+
 
 # 日志案例
     以下是实际项目使用的异常收集，是项目使用的分为wp-server，这个是分布式取消息服务，每个线程池对应一个应用(每个应用是redis里一个key,看客户端代码)，获取消息存到mongodb里
