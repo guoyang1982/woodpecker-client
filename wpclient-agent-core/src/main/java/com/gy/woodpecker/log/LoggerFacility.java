@@ -9,6 +9,7 @@ import com.gy.woodpecker.message.MessageBean;
 import com.gy.woodpecker.redis.RedisClient;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import com.gy.woodpecker.tools.IPUtile;
+import com.gy.woodpecker.tools.LogStackString;
 import com.gy.woodpecker.tools.MsgPackUtil;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import com.gy.woodpecker.transformer.WoodpeckTransformer;
@@ -24,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.regex.Matcher;
 
 /**
  * Created by guoyang on 17/10/27.
@@ -151,9 +153,8 @@ public class LoggerFacility {
      *
      * @param msg
      */
-    public void sendToRedis(final String msg) {
+    public void sendToRedis(final String msg, final Object[] params) {
         //log.info("发送异常日志消息!" + msg);
-
         if (!slog) {
             log.info("客户端关闭了发送, 不处理操作!");
             return;
@@ -166,19 +167,31 @@ public class LoggerFacility {
             log.info("应用名为空, 不处理操作!");
             return;
         }
+
         executorPools.execute(new Runnable() {
             public void run() {
                 try {
+                    String tempStr = msg;
+                    if (null != params) {
+                        for (Object o : params) {
+                            if (o instanceof Exception) {
+                                String inf = LogStackString.errInfo((Exception) o);
+                                //使用Matcher.quoteReplacement避免有$替换出现问题的情况
+                                tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(inf));
+                            } else {
+                                tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(String.valueOf(o)));
+                            }
+                        }
+                    }
 
                     MessageBean messageBean = new MessageBean();
                     messageBean.setAppName(appName);
                     messageBean.setIp(IPUtile.getIntranetIP());
-                    messageBean.setMsg(msg);
+                    messageBean.setMsg(tempStr);
                     messageBean.setCreateTime(timeForNow());
-
                     //RedisClient.RedisClientInstance.rightPush(appName, JSONObject.toJSONString(messageBean));
                     byte[] msg = MsgPackUtil.toBytes(messageBean);
-                    RedisClient.RedisClientInstance.rightPushBytes(appName,msg);
+                    RedisClient.RedisClientInstance.rightPushBytes(appName, msg);
                 } catch (Exception e) {
                     log.info("发送异常日志消息失败!" + e.getMessage());
                 }
@@ -187,41 +200,30 @@ public class LoggerFacility {
         });
     }
 
-    public static void main(String args[]) throws Exception{
-        // Create serialize objects.
-//        List<String> src = new ArrayList<String>();
-//        src.add("msgpack");
-//        src.add("kumofs");
-//        src.add("viver");
+    public static void main(String args[]) throws Exception {
 
-// Serialize
-//        byte[] raw = msgpack.write(src);
+//        MessageBean messageBean = new MessageBean();
+//        messageBean.setAppName("lms");
+//        messageBean.setIp(IPUtile.getIntranetIP());
+//        messageBean.setMsg("ssssssssdffg");
+////        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        Date now = new Date();
+//        //messageBean.setCreateTime(format.format(now));
+//        byte[] raw1 = MsgPackUtil.toBytes(messageBean);
+//        System.out.println(new String(raw1));
+//        MessageBean obj = MsgPackUtil.toObject(raw1, MessageBean.class);
+//        System.out.println(obj.getAppName());
 
-// Deserialize directly using a template
-//        List<String> dst1 = msgpack.read(raw, Templates.tList(Templates.TString));
-//        System.out.println(dst1.get(0));
-//        System.out.println(dst1.get(1));
-//        System.out.println(dst1.get(2));
+        String sss = "ddddddd={}";
+        String ddd = null;
+        String str = "";
+        try {
+            ddd.equals("");
+        } catch (Exception e) {
+            str = LogStackString.errInfo(e)+"$a";
+        }
+        System.out.println(sss.replaceFirst("\\{\\}", Matcher.quoteReplacement(str)));
 
-// Or, Deserialze to Value then convert type.
-//        Value dynamic = msgpack.read(raw);
-//        List<String> dst2 = new Converter(dynamic)
-//                .read(Templates.tList(Templates.TString));
-//        System.out.println(dst2.get(0));
-//        System.out.println(dst2.get(1));
-//        System.out.println(dst2.get(2));
-
-        MessageBean messageBean = new MessageBean();
-        messageBean.setAppName("lms");
-        messageBean.setIp(IPUtile.getIntranetIP());
-        messageBean.setMsg("ssssssssdffg");
-//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        Date now = new Date();
-        //messageBean.setCreateTime(format.format(now));
-        byte[] raw1 = MsgPackUtil.toBytes(messageBean);
-        System.out.println(new String(raw1));
-        MessageBean obj = MsgPackUtil.toObject(raw1,MessageBean.class);
-        System.out.println(obj.getAppName());
     }
 
     private String timeForNow() {

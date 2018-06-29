@@ -17,9 +17,21 @@ public class LoggerFactoryProx {
         objectOfLog = objectOfLogT;
     }
 
+    public static void sendToRedis(final String msg,Object[] params){
+        try {
+            classOfLog.getMethod("sendToRedis",String.class,Object[].class).invoke(objectOfLog,msg,params);
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static void sendToRedis(final String msg){
         try {
-            classOfLog.getMethod("sendToRedis",String.class).invoke(objectOfLog,msg);
+            classOfLog.getMethod("sendToRedis",String.class,Object[].class).invoke(objectOfLog,msg,null);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
