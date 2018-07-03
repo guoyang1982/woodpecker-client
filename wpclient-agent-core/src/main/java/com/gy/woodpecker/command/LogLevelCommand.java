@@ -74,7 +74,8 @@ public class LogLevelCommand extends AbstractCommand{
                 } catch (Exception e) {
                     log.info(e.getMessage());
                 }
-                break;
+                //去掉break， org.slf4j.LoggerFactory会有两个，1个是应用的，另一个是woodpecker的，所以两个都需要做。这样做root设置日志级别时woodpecker也会生效
+                //break;
             }
         }
     }

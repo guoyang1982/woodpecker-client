@@ -109,8 +109,8 @@ public class LogInfoCommand extends AbstractCommand{
                 }catch (Exception e){
                     log.info(e.getMessage());
                 }
-
-                return true;
+                //注释掉这段代码 Instrumentation里包含里应用的org.slf4j.LoggerFactory 和啄木鸟的org.slf4j.LoggerFactory，把这两个的日志类都打印出来
+                //return true;
             }
         }
         return false;
