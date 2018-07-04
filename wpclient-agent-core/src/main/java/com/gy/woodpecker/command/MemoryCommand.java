@@ -115,7 +115,7 @@ public class MemoryCommand extends AbstractCommand{
                     new TTable.ColumnDefine(TTable.Align.RIGHT),
                     new TTable.ColumnDefine(TTable.Align.LEFT));
             tKv.add(garbageCollectorMXBean.getName()+" count",garbageCollectorMXBean.getCollectionCount());
-            tKv.add(garbageCollectorMXBean.getName()+" time",garbageCollectorMXBean.getCollectionCount());
+            tKv.add(garbageCollectorMXBean.getName()+" time",garbageCollectorMXBean.getCollectionTime());
             tTable.addRow(tKv.rendering());
         }
 
