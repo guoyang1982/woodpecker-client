@@ -76,8 +76,12 @@
 
 ### 9.top命令
 查看应用线程占用cpu时间，能够排查占用cpu时间最大的线程栈，进而追踪到有问题的代码，同jstack
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/top.jpg)
+
 ### 10.jstat
 查看内存占用情况,以及垃圾收集情况，和jdk的jstat功能一样
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/jstat.jpg)
+
 ### 11.stack命令
 查看方法的线程栈，当不知道方法的调用路径时，这个比较不错，尤其对二方包等。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/stack.jpg)
