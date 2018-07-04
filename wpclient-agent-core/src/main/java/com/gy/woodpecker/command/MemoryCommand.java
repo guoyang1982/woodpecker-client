@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 
 import java.lang.instrument.Instrumentation;
+import java.lang.management.GarbageCollectorMXBean;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryPoolMXBean;
 import java.util.List;
@@ -26,12 +27,12 @@ import static java.lang.management.MemoryType.NON_HEAP;
  * @date 2017/12/21 下午1:38
  */
 @Slf4j
-@Cmd(name = "memory", sort = 17, summary = "Display memory information",
+@Cmd(name = "jstat", sort = 17, summary = "Display memory information",
         eg = {
-                "memory",
-                "memory -a",
-                "memory -t 10",
-                "memory -ta 10"
+                "jstat",
+                "jstat -a",
+                "jstat -t 10",
+                "jstat -ta 10"
         })
 public class MemoryCommand extends AbstractCommand{
     @IndexArg(index = 0, name = "times",isRequired = false ,summary = "timing interval(s)")
@@ -76,6 +77,10 @@ public class MemoryCommand extends AbstractCommand{
         }
     }
 
+    /**
+     * PSScavenge（＝“ParallelScavenge的Scavenge”）就是负责minor GC的收集器；
+     * 而负责full GC的收集器叫做PSMarkSweep（＝“ParallelScavenge的MarkSweep”）
+     */
     private void printMemory() {
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
                 new TTable.ColumnDefine()
@@ -87,17 +92,31 @@ public class MemoryCommand extends AbstractCommand{
                     new TTable.ColumnDefine(TTable.Align.LEFT));
             if(isAll){
                 tKv.add("name",mp.getName());
+                tKv.add("Usage",mp.getUsage());
                 tKv.add("CollectionUsage",mp.getCollectionUsage());
+                tKv.add("PeakUsage",mp.getPeakUsage());
                 tKv.add("type", mp.getType());
                 tTable.addRow(tKv.rendering());
             }else {
                 if (mp.getType() == HEAP) {
                     tKv.add("name", mp.getName());
-                    tKv.add("CollectionUsage", mp.getCollectionUsage());
+                    tKv.add("Usage",mp.getUsage());
+                    tKv.add("CollectionUsage",mp.getCollectionUsage());
+                    tKv.add("PeakUsage",mp.getPeakUsage());
                     tKv.add("type", mp.getType());
                     tTable.addRow(tKv.rendering());
                 }
             }
+        }
+        //垃圾收集
+        List<GarbageCollectorMXBean> garbageCollectorMXBeans = ManagementFactory.getGarbageCollectorMXBeans();
+        for (GarbageCollectorMXBean garbageCollectorMXBean : garbageCollectorMXBeans) {
+            final TKv tKv = new TKv(
+                    new TTable.ColumnDefine(TTable.Align.RIGHT),
+                    new TTable.ColumnDefine(TTable.Align.LEFT));
+            tKv.add(garbageCollectorMXBean.getName()+" count",garbageCollectorMXBean.getCollectionCount());
+            tKv.add(garbageCollectorMXBean.getName()+" time",garbageCollectorMXBean.getCollectionCount());
+            tTable.addRow(tKv.rendering());
         }
 
         ctxT.writeAndFlush(tTable.rendering());
