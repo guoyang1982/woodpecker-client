@@ -4,6 +4,7 @@ import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.log.Logstatic;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
 import redis.clients.jedis.HostAndPort;
 import redis.clients.jedis.JedisCluster;
@@ -64,10 +65,14 @@ public class RedisClient {
         }
 
         //注意：这里超时时间不要太短，他会有超时重试机制。而且其他像httpclient、dubbo等RPC框架也要注意这点
-        jedisCluster = new JedisCluster
-                (nodes, conTimeoutR, soTimeoutR, maxAttemptsR,
-                        password, new GenericObjectPoolConfig());
-
+        if(StringUtils.isBlank(password)){
+            jedisCluster = new JedisCluster
+                    (nodes, conTimeoutR, soTimeoutR, maxAttemptsR, new GenericObjectPoolConfig());
+        }else{
+            jedisCluster = new JedisCluster
+                    (nodes, conTimeoutR, soTimeoutR, maxAttemptsR,
+                            password, new GenericObjectPoolConfig());
+        }
     }
 
     public void set(String key, String value, int time) {
