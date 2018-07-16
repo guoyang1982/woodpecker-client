@@ -177,6 +177,21 @@ public class SpyTransformer implements ClassFileTransformer {
 
 
         //插入addcatch,这里的不需要插入自己的间谍分析代码，但是要获取异常信息和返回信息
+        /**
+         * addCatch() 指的是在方法中加入try catch 块，需要注意的是，必须在插入的代码中，加入return 值$e代表 异常值。比如：
+         CtMethod m = ...;
+         CtClass etype = ClassPool.getDefault().get("java.lang.Exception");
+         m.addCatch("{ System.out.println($e); throw $e; }", etype);
+         实际代码如下：
+         try {
+         the original method body
+         }
+         catch (java.lang.Exception e) {
+         System.out.println(e);
+         throw e;
+         }
+
+         */
         if (afterMethod) {
             StringBuffer afterThrowsBody = new StringBuffer();
 
@@ -197,6 +212,9 @@ public class SpyTransformer implements ClassFileTransformer {
         }
 
 
+        /**
+         * Handler 代表的是一个try catch 声明。
+         */
         if (command.getCommandType().equals(CommandEnum.TRACE)) {
             m.instrument(new ExprEditor() {
                 public void edit(Handler h)
