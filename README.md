@@ -27,7 +27,7 @@
     加入以下配置到 /conf/resin.xml:
     <jvm-arg>-javaagent:/jar包路径/wpclient-agent.jar=/配置文件路径/woodpecker.properties</jvm-arg>
    ### 如果只想使用命令工具，可以应用启动后，随时attach:
-   jsp 获取应用的pid
+   jps 获取应用的pid
    然后./woodpecker-launch.sh pid
    最后执行./woodpecker-run.sh ip port 就ok了
 
