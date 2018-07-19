@@ -26,6 +26,11 @@
    ### resin:
     加入以下配置到 /conf/resin.xml:
     <jvm-arg>-javaagent:/jar包路径/wpclient-agent.jar=/配置文件路径/woodpecker.properties</jvm-arg>
+   ### 如果只想使用命令工具，可以应用启动后，随时attach:
+   jsp 获取应用的pid
+   然后./woodpecker-launch.sh pid
+   最后执行./woodpecker-run.sh ip port 就ok了
+
 ## 5.远程控制
    ### 客户端开了一个端口，可以用telnet进行远程控制，端口号可以在配置文件里配置，远程可以修改配置文件里的必要信息，命令：
       telnet ip port
