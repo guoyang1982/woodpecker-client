@@ -1,6 +1,6 @@
 # wpclient-agent
   是一个异常日志收集的客户端，用javaagent实现，可以收集error级别(也可以配置info和debug级别日志)
-  的所有日志发送到redis队列里（采用二进制传输协议 更小更快）。这个是客户端，需要自己实现服务端消费获取队列里的消息，处理并展示。而且可以支持线上debug，
+  的所有日志发送到redis队列里（采用二进制传输协议 更小更快）。这个是客户端，需要自己实现服务端消费获取队列里的消息，处理并展示（[woodpecker服务端地址](https://github.com/guoyang1982/woodpecker)）。而且可以支持线上debug，
   性能等分析命令，可以应用运行后attach分析。
 
 # 如何使用
