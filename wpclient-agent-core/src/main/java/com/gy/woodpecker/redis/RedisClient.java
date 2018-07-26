@@ -96,7 +96,7 @@ public class RedisClient {
     }
 
     public void rightPushBytes(String key, byte[] value) {
-        log.info("the key123=" + key);
+        //log.info("the key123=" + key);
         jedisCluster.rpush(key.getBytes(), value);
     }
 
