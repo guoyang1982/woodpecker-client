@@ -3,6 +3,7 @@ package com.gy.woodpecker.redis;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.log.Logstatic;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
+import com.gy.woodpecker.tools.IPUtile;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.pool2.impl.GenericObjectPoolConfig;
@@ -31,7 +32,10 @@ public class RedisClient {
 
     public volatile boolean telHealthCheck = true;
 
-    private int healthCheckDelay = 10000;
+    private int healthCheckDelay = 2000;
+
+    String port = ConfigPropertyUtile.getProperties().getProperty("log.netty.server.port");
+    String appName = ConfigPropertyUtile.getProperties().getProperty("application.name");
 
     private RedisClient() {
     }
@@ -39,7 +43,7 @@ public class RedisClient {
     public void init() {
         log.info("init redis!!!!!!");
         String delay = ConfigPropertyUtile.getProperties().getProperty("redis.health.check.delay");
-        if(null != delay && !delay.equals("")){
+        if (null != delay && !delay.equals("")) {
             this.healthCheckDelay = Integer.parseInt(delay);
         }
         String hosts = ConfigPropertyUtile.getProperties().getProperty("redis.cluster.host");
@@ -65,14 +69,22 @@ public class RedisClient {
         }
 
         //注意：这里超时时间不要太短，他会有超时重试机制。而且其他像httpclient、dubbo等RPC框架也要注意这点
-        if(StringUtils.isBlank(password)){
+        if (StringUtils.isBlank(password)) {
             jedisCluster = new JedisCluster
                     (nodes, conTimeoutR, soTimeoutR, maxAttemptsR, new GenericObjectPoolConfig());
-        }else{
+        } else {
             jedisCluster = new JedisCluster
                     (nodes, conTimeoutR, soTimeoutR, maxAttemptsR,
                             password, new GenericObjectPoolConfig());
         }
+
+        //设置应用相关信息
+        setAppInfo();
+    }
+
+    public void setAppInfo() {
+        jedisCluster.sadd("woodpecker_apps", appName);
+        jedisCluster.sadd("woodpecker_app_" + appName, IPUtile.getIntranetIP() + ":" + port);
     }
 
     public void set(String key, String value, int time) {
@@ -108,7 +120,7 @@ public class RedisClient {
                         log.info("执行redis健康检查!");
                         try {
                             //if(null != redisClient){
-                            set(appName + "-ping", "1", 1);
+                            set(appName + "_" + IPUtile.getIntranetIP() + ":" + port, "1", 3);
                             // }
                             LoggerFacility.f = true;
                         } catch (Exception e) {
