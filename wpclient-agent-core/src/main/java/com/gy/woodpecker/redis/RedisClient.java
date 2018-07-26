@@ -117,7 +117,7 @@ public class RedisClient {
                         if (!telHealthCheck) {
                             return;
                         }
-                        log.info("执行redis健康检查!");
+                        //log.info("执行redis健康检查!");
                         try {
                             //if(null != redisClient){
                             set(appName + "_" + IPUtile.getIntranetIP() + ":" + port, "1", 3);
