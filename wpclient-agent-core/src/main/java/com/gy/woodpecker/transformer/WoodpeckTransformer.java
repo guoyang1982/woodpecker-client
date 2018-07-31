@@ -21,7 +21,7 @@ public class WoodpeckTransformer implements ClassFileTransformer {
     private String loger = "logback";
 
     private final String logbakInfo = "if(level.levelStr.equals(\"ERROR\")){" +
-            "com.gy.woodpecker.agent.LoggerFactoryProx.sendToRedis(msg,params);}";
+            "com.gy.woodpecker.agent.LoggerFactoryProx.sendToRedis(msg,params,t);}";
 
     private final String log4jInfo = "if(level.levelStr.equals(\"ERROR\")){" +
             "com.gy.woodpecker.agent.LoggerFactoryProx.sendToRedis(message.toString());}";

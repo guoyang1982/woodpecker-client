@@ -153,7 +153,7 @@ public class LoggerFacility {
      *
      * @param msg
      */
-    public void sendToRedis(final String msg, final Object[] params) {
+    public void sendToRedis(final String msg, final Object[] params, final Throwable t) {
         //log.info("发送异常日志消息!" + msg);
         if (!slog) {
             log.info("客户端关闭了发送, 不处理操作!");
@@ -172,12 +172,22 @@ public class LoggerFacility {
             public void run() {
                 try {
                     String tempStr = msg;
+                    if(null != t){
+                        String inf = LogStackString.errInfo((Exception) t);
+                        tempStr = tempStr + inf;
+                    }
+
                     if (null != params) {
                         for (Object o : params) {
                             if (o instanceof Exception) {
                                 String inf = LogStackString.errInfo((Exception) o);
+                                //如果有{}则替换，无则链接
+                                String temp = tempStr;
                                 //使用Matcher.quoteReplacement避免有$替换出现问题的情况
                                 tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(inf));
+                                if (temp.equals(tempStr)) {
+                                    tempStr = tempStr + inf;
+                                }
                             } else {
                                 tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(String.valueOf(o)));
                             }
@@ -215,12 +225,15 @@ public class LoggerFacility {
 //        System.out.println(obj.getAppName());
 
         String sss = "ddddddd={}";
+        if (sss.contains("\\{\\}")) {
+            System.out.println("ffffffffffffff");
+        }
         String ddd = null;
         String str = "";
         try {
             ddd.equals("");
         } catch (Exception e) {
-            str = LogStackString.errInfo(e)+"$a";
+            str = LogStackString.errInfo(e) + "$a";
         }
         System.out.println(sss.replaceFirst("\\{\\}", Matcher.quoteReplacement(str)));
 
