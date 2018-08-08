@@ -4,9 +4,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 /**
- * 间谍类<br/>
- * 藏匿在各个ClassLoader中
- * Created by oldmanpushcart@gmail.com on 15/8/23.
+ * 间谍类  此类藏匿在jvm内的各个ClassLoader中
+ * 作为应用内插桩代码和core内的代码调用的桥梁
  */
 public class Spy {
 
