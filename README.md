@@ -44,6 +44,7 @@
 ### 1.help命令
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help.jpg)
 查看详细命令：
+注意：memory已经改为了jstat
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/help1.jpg)
 
 ### 2.loglevel命令
