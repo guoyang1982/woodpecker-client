@@ -1,5 +1,7 @@
 package com.gy.woodpecker.tools;
 
+import org.apache.commons.lang.StringUtils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -135,6 +137,36 @@ public class IPUtile {
         return ip != null && !ip.equals("")?ip.trim():"127.0.0.1";
     }
 
+    /**
+     * 判断ip是否在ip网段中
+     * @param ip
+     * @param cidr ip 10.2.3.5或者ip网段 10.2.3.0/24
+     * @return
+     */
+    public static boolean isInRange(String ip, String cidr) {
+        if (StringUtils.isEmpty(cidr)) {
+            return true;
+        }
+        if (cidr.indexOf("/") < 0 && cidr.equals(ip)) {
+            return true;
+        }
+        if (cidr.indexOf("/") < 0 && !cidr.equals(ip)) {
+            return false;
+        }
+        String[] ips = ip.split("\\.");
+        int ipAddr = (Integer.parseInt(ips[0]) << 24)
+                | (Integer.parseInt(ips[1]) << 16)
+                | (Integer.parseInt(ips[2]) << 8) | Integer.parseInt(ips[3]);
+        int type = Integer.parseInt(cidr.replaceAll(".*/", ""));
+        int mask = 0xFFFFFFFF << (32 - type);
+        String cidrIp = cidr.replaceAll("/.*", "");
+        String[] cidrIps = cidrIp.split("\\.");
+        int cidrIpAddr = (Integer.parseInt(cidrIps[0]) << 24)
+                | (Integer.parseInt(cidrIps[1]) << 16)
+                | (Integer.parseInt(cidrIps[2]) << 8)
+                | Integer.parseInt(cidrIps[3]);
 
+        return (ipAddr & mask) == (cidrIpAddr & mask);
+    }
 }
 
