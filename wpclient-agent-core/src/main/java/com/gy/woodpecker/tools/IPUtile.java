@@ -27,17 +27,25 @@ public class IPUtile {
         while (allNetInterfaces.hasMoreElements()) {
             NetworkInterface netInterface = (NetworkInterface) allNetInterfaces.nextElement();
             Enumeration addresses = netInterface.getInetAddresses();
+            String name = netInterface.getName();
             while (addresses.hasMoreElements()) {
                 ip = (InetAddress) addresses.nextElement();
                 if (ip != null && ip instanceof Inet4Address) {
                     String netIP = ip.getHostAddress();
                     if (netIP.startsWith("10.") || netIP.startsWith("172.") || netIP.startsWith("192.")) {
+                        if(name.startsWith("docker") || name.startsWith("flannel")){
+                            continue;
+                        }
                         return netIP;
                     }
                 }
             }
         }
         return "127.0.0.1";
+    }
+
+    public static void main(String args[]){
+        getIntranetIP();
     }
 
     public static String getIP() {

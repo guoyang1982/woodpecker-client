@@ -1,25 +1,20 @@
 package com.gy.woodpecker.transformer;
 
-import com.alibaba.fastjson.JSON;
 import com.gy.woodpecker.command.Command;
 import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.enumeration.CommandEnum;
 import javassist.*;
-
 import javassist.bytecode.MethodInfo;
 import javassist.expr.ExprEditor;
-import javassist.expr.FieldAccess;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
 import lombok.extern.slf4j.Slf4j;
-
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.*;
-
 import static java.io.File.separatorChar;
 import static java.lang.System.getProperty;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
