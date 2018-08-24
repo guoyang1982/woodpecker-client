@@ -9,12 +9,15 @@ import javassist.expr.ExprEditor;
 import javassist.expr.Handler;
 import javassist.expr.MethodCall;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.instrument.ClassFileTransformer;
 import java.lang.instrument.IllegalClassFormatException;
 import java.security.ProtectionDomain;
 import java.util.*;
+
 import static java.io.File.separatorChar;
 import static java.lang.System.getProperty;
 import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
@@ -57,6 +60,10 @@ public class SpyTransformer implements ClassFileTransformer {
         //if(null == byteCode){
         byte[] byteCode = classfileBuffer;
         //}
+        if(classBeingRedefined == null){
+            //类对象为null 不转换
+            return null;
+        }
 
         className = className.replace('/', '.');
 
@@ -101,7 +108,13 @@ public class SpyTransformer implements ClassFileTransformer {
             CtMethod[] methods = cc.getDeclaredMethods();
             if (null != methods && methods.length > 0) {
                 for (CtMethod m : methods) {
-                    if (m.getName().equals(methodName)) {
+                    if (StringUtils.isEmpty(methodName)) {
+                        //这个类的所有方法都增强 但是排除set get is打头的方法
+                        if (m.getName().startsWith("get") || m.getName().startsWith("set") || m.getName().startsWith("is")) {
+                            continue;
+                        }
+                        aopLog(loader, className, m);
+                    } else if (m.getName().equals(methodName)) {
                         aopLog(loader, className, m);
                     }
                 }
@@ -197,13 +210,13 @@ public class SpyTransformer implements ClassFileTransformer {
                 e.printStackTrace();
             }
             // 判断是否为静态方法
-            if(Modifier.isStatic(m.getModifiers())){
+            if (Modifier.isStatic(m.getModifiers())) {
                 afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,$e);");
-            }else{
+            } else {
                 afterThrowsBody.append("com.gy.woodpecker.agent.Spy.methodOnThrowingEnd(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,$e);");
             }
 
-            m.addCatch("{"+afterThrowsBody.toString()+"; throw $e; }", etype);
+            m.addCatch("{" + afterThrowsBody.toString() + "; throw $e; }", etype);
         }
 
 
@@ -221,7 +234,7 @@ public class SpyTransformer implements ClassFileTransformer {
                     String throwException = "$1";
                     String before = "com.gy.woodpecker.agent.Spy.methodOnInvokeThrowTracing("
                             + command.getSessionId() + "," + lineNumber + ",\"" + clazzName + "\",\"" + methodName + "\",\"" + methodDes + "\",$1);";
-                    if(!h.isFinally()){
+                    if (!h.isFinally()) {
                         h.insertBefore(before);
                     }
                 }
@@ -238,9 +251,9 @@ public class SpyTransformer implements ClassFileTransformer {
         StringBuffer beforeBody = new StringBuffer();
         if (beforeMethod) {
             // 判断是否为静态方法
-            if(Modifier.isStatic(m.getModifiers())){
+            if (Modifier.isStatic(m.getModifiers())) {
                 beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args);");
-            }else{
+            } else {
                 beforeBody.append("com.gy.woodpecker.agent.Spy.beforeMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args);");
             }
             m.insertBefore(beforeBody.toString());
@@ -255,8 +268,8 @@ public class SpyTransformer implements ClassFileTransformer {
                 CtClass cc = m.getReturnType();
                 String retype = cc.getName();
 
-                if(retype.equals("boolean") || retype.equals("double") || retype.equals("int")
-                        || retype.equals("long") || retype.equals("float") || retype.equals("byte") || retype.equals("char")){
+                if (retype.equals("boolean") || retype.equals("double") || retype.equals("int")
+                        || retype.equals("long") || retype.equals("float") || retype.equals("byte") || retype.equals("char")) {
 
                     result = "String.valueOf($_)";
 
@@ -266,11 +279,11 @@ public class SpyTransformer implements ClassFileTransformer {
                 e.printStackTrace();
             }
             // 判断是否为静态方法
-            if(Modifier.isStatic(m.getModifiers())){
-                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args,"+result+");");
+            if (Modifier.isStatic(m.getModifiers())) {
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,null,$args," + result + ");");
 
-            }else{
-                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args,"+result+");");
+            } else {
+                afterBody.append("com.gy.woodpecker.agent.Spy.afterMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",null,this,$args," + result + ");");
             }
             m.insertAfter(afterBody.toString());
         }

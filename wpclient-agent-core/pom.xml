@@ -140,5 +140,9 @@
             <groupId>org.msgpack</groupId>
             <artifactId>jackson-dataformat-msgpack</artifactId>
         </dependency>
+        <!--<dependency>-->
+            <!--<groupId>com.google.guava</groupId>-->
+            <!--<artifactId>guava</artifactId>-->
+        <!--</dependency>-->
     </dependencies>
 </project>
