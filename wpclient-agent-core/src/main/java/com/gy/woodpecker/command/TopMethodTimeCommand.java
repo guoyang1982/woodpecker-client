@@ -26,7 +26,7 @@ import static com.gy.woodpecker.tools.GaCheckUtils.isEquals;
  * @date 2018/8/23 下午5:19
  */
 @Slf4j
-@Cmd(name = "smonitor", sort = 18, summary = "Monitor the execution of specified Class and its all method",
+@Cmd(name = "smonitor", sort = 19, summary = "Monitor the execution of specified Class and its all method",
         eg = {
                 "smonitor -c 5 org.apache.commons.lang.StringUtils",
         })
