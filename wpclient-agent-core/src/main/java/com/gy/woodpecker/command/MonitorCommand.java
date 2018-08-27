@@ -4,10 +4,12 @@ import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.textui.TTable;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.tools.SimpleDateFormatHolder;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.text.DecimalFormat;
@@ -40,6 +42,12 @@ public class MonitorCommand extends AbstractCommand {
     @NamedArg(name = "c", hasValue = true, summary = "The cycle of monitor")
     private int cycle = 120;
 
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
     /*
      * 输出定时任务
     */
@@ -64,8 +72,8 @@ public class MonitorCommand extends AbstractCommand {
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);
-                    //接收结果打印
-                    create();
+//                    //接收结果打印
+//                    create();
                 } catch (Exception e) {
                     log.error("执行异常{}", e);
                 } finally {
@@ -73,6 +81,15 @@ public class MonitorCommand extends AbstractCommand {
                 }
             }
         }
+
+        if (has) {
+            if (StringUtils.isNotBlank(output)) {
+                fileWriter = new DailyRollingFileWriter(outPath + output);
+            }
+            //接收结果打印
+            create();
+        }
+
         //等待结果
         super.isWait = true;
         return has;
@@ -111,9 +128,7 @@ public class MonitorCommand extends AbstractCommand {
                     }
 
                     if (null != data) {
-
                         final DecimalFormat df = new DecimalFormat("00.00");
-
                         tTable.addRow(
                                 SimpleDateFormatHolder.getInstance().format(new Date()),
                                 entry.getKey().className,
@@ -131,8 +146,12 @@ public class MonitorCommand extends AbstractCommand {
                 }
 
                 tTable.padding(1);
-
-                ctxT.writeAndFlush(tTable.rendering());
+                if (StringUtils.isNotBlank(output)) {
+                    fileWriter.append(tTable.rendering());
+                    fileWriter.flushAppend();
+                } else {
+                    ctxT.writeAndFlush(tTable.rendering());
+                }
             }
 
         }, 0, cycle * 1000);
@@ -148,7 +167,6 @@ public class MonitorCommand extends AbstractCommand {
 
     /**
      * 数据监控用的Key
-     *
      */
     private static class Key {
         private final String className;
@@ -204,7 +222,7 @@ public class MonitorCommand extends AbstractCommand {
 
     @Override
     public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
-                                Object target, Object[] args,Throwable returnObject) {
+                                Object target, Object[] args, Throwable returnObject) {
 
         try {
             finishing(className, methodName, false);
@@ -265,6 +283,9 @@ public class MonitorCommand extends AbstractCommand {
     public void destroy() {
         if (null != timer) {
             timer.cancel();
+        }
+        if(null != fileWriter){
+            fileWriter.closeFile();
         }
     }
 }

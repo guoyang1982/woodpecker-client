@@ -9,6 +9,9 @@ import org.apache.commons.lang.StringUtils;
 
 import java.lang.instrument.Instrumentation;
 
+import static java.io.File.separatorChar;
+import static java.lang.System.getProperty;
+
 /**
  * @author guoyang
  * @Description: TODO
@@ -19,6 +22,7 @@ public abstract class AbstractCommand implements Command{
     int sessionId;
     boolean res = true;
     public  boolean isWait = false;
+    String outPath = getProperty("user.home") + separatorChar + "woodpecker-analysis" + separatorChar;
 
     public void setCtxT(ChannelHandlerContext ctxT) {
         this.ctxT = ctxT;

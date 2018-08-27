@@ -5,6 +5,7 @@ import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.enumeration.CommandEnum;
 import com.gy.woodpecker.textui.TTree;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
@@ -44,6 +45,12 @@ public class TraceCommand extends AbstractCommand {
 
     @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
     private Integer threshold;
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
 
     @Override
     public boolean getIfEnhance() {
@@ -78,8 +85,11 @@ public class TraceCommand extends AbstractCommand {
                 }
             }
         }
-        if(!has){
+        if (!has) {
             setRes(has);
+        }
+        if (has && StringUtils.isNotBlank(output)) {
+            fileWriter = new DailyRollingFileWriter(outPath + output);
         }
         //等待结果
         super.isWait = true;
@@ -126,7 +136,7 @@ public class TraceCommand extends AbstractCommand {
         final Long cost = invokeCost.cost();
 
         //调用次数判断
-        if(isOverThreshold(timesRef.incrementAndGet())){
+        if (isOverThreshold(timesRef.incrementAndGet())) {
             //超过设置的调用次数 结束
             timesRef.set(0);
             ctxT.writeAndFlush("\n\0");
@@ -134,33 +144,43 @@ public class TraceCommand extends AbstractCommand {
         }
 
         //时间判断
-        if(StringUtils.isNotBlank(conditionExpress)){
+        if (StringUtils.isNotBlank(conditionExpress)) {
             //符合表达式时间的才输出
             ScriptEngine engine = manager.getEngineByName("js");
             engine.put("cost", cost);
             try {
-                Boolean res =(Boolean)engine.eval(conditionExpress);
-                if(res.booleanValue()){
+                Boolean res = (Boolean) engine.eval(conditionExpress);
+                if (res.booleanValue()) {
                     final Trace traceR = traceRef.get();
                     String result = traceR.tTree.rendering();
                     if (cost != null) {
                         result = result.replaceFirst("costTime", String.valueOf(cost));
 
                     }
-                    ctxT.writeAndFlush(result);
+                    if (StringUtils.isNotBlank(output)) {
+                        fileWriter.append(result);
+                        fileWriter.flushAppend();
+                    } else {
+                        ctxT.writeAndFlush(result);
+                    }
                 }
 
             } catch (ScriptException e) {
                 e.printStackTrace();
             }
-        }else {
+        } else {
             final Trace traceR = traceRef.get();
             String result = traceR.tTree.rendering();
             if (cost != null) {
                 result = result.replaceFirst("costTime", String.valueOf(cost));
 
             }
-            ctxT.writeAndFlush(result);
+            if (StringUtils.isNotBlank(output)) {
+                fileWriter.append(result);
+                fileWriter.flushAppend();
+            } else {
+                ctxT.writeAndFlush(result);
+            }
         }
 
     }
@@ -168,7 +188,7 @@ public class TraceCommand extends AbstractCommand {
 
     @Override
     public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
-                                Object target, Object[] args,Throwable returnObject){
+                                Object target, Object[] args, Throwable returnObject) {
 
         printResult();
     }
@@ -183,7 +203,7 @@ public class TraceCommand extends AbstractCommand {
     }
 
     @Override
-    public void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException){
+    public void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException) {
         final Trace trace = traceRef.get();
         if (!trace.tTree.isTop()) {
             trace.tTree.set(trace.tTree.get() + "[throw " + throwException + "]").end();
@@ -206,6 +226,13 @@ public class TraceCommand extends AbstractCommand {
 
         private Trace(TTree tTree) {
             this.tTree = tTree;
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if (null != fileWriter) {
+            fileWriter.closeFile();
         }
     }
 }

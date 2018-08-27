@@ -4,10 +4,12 @@ import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.textui.TTable;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.tools.SimpleDateFormatHolder;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
 import java.lang.instrument.Instrumentation;
 import java.text.DecimalFormat;
@@ -19,6 +21,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.gy.woodpecker.tools.GaCheckUtils.isEquals;
+import static java.io.File.separatorChar;
+import static java.lang.System.getProperty;
 
 /**
  * @author guoyang
@@ -26,9 +30,9 @@ import static com.gy.woodpecker.tools.GaCheckUtils.isEquals;
  * @date 2018/8/23 下午5:19
  */
 @Slf4j
-@Cmd(name = "smonitor", sort = 19, summary = "Monitor the execution of specified Class and its all method",
+@Cmd(name = "scan", sort = 19, summary = "scan the execution of specified Class and its all method",
         eg = {
-                "smonitor -c 5 org.apache.commons.lang.StringUtils",
+                "scan -c 5 org.apache.commons.lang.StringUtils",
         })
 public class TopMethodTimeCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
@@ -39,6 +43,9 @@ public class TopMethodTimeCommand extends AbstractCommand {
 
     @NamedArg(name = "t", hasValue = true, summary = "The counts of monitor")
     private int top = 10;
+
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
 
     /*
      * 输出定时任务
@@ -53,17 +60,25 @@ public class TopMethodTimeCommand extends AbstractCommand {
 
     private final InvokeCost invokeCost = new InvokeCost();
 
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
+
+    public TopMethodTimeCommand() {
+    }
+
     @Override
     public boolean excute(Instrumentation inst) {
         Class[] classes = inst.getAllLoadedClasses();
         boolean has = false;
         for (Class clazz : classes) {
-            //只要正常的普通类
-            if (clazz.isEnum() || clazz.isAnnotation() || clazz.isInterface() || clazz.isLocalClass() || clazz.isMemberClass() || clazz.isPrimitive()) {
-                continue;
-            }
 
             if (clazz.getName().startsWith(classPattern) && !clazz.getName().startsWith("com.gy.woodpecker")) {
+                //只要正常的普通类
+                if (clazz.isEnum() || clazz.isAnnotation() || clazz.isInterface() || clazz.isLocalClass() || clazz.isMemberClass() || clazz.isPrimitive()) {
+                    continue;
+                }
                 has = true;
                 SpyTransformer transformer = new SpyTransformer(null, true, true, this);
                 inst.addTransformer(transformer, true);
@@ -77,6 +92,9 @@ public class TopMethodTimeCommand extends AbstractCommand {
             }
         }
         if (has) {
+            if (StringUtils.isNotBlank(output)) {
+                fileWriter = new DailyRollingFileWriter(outPath + output);
+            }
             //接收结果打印
             create();
         }
@@ -175,7 +193,12 @@ public class TopMethodTimeCommand extends AbstractCommand {
                         }
 
                         tTable.padding(1);
-                        ctxT.writeAndFlush(tTable.rendering());
+                        if (StringUtils.isNotBlank(output)) {
+                            fileWriter.append(tTable.rendering());
+                            fileWriter.flushAppend();
+                        } else {
+                            ctxT.writeAndFlush(tTable.rendering());
+                        }
                     }
                 },
                 initDelay,
@@ -306,5 +329,8 @@ public class TopMethodTimeCommand extends AbstractCommand {
     @Override
     public void destroy() {
         executor.shutdownNow();
+        if(null != fileWriter){
+            fileWriter.closeFile();
+        }
     }
 }

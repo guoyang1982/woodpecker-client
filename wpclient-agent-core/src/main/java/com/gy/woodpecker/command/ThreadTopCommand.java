@@ -89,7 +89,8 @@ public class ThreadTopCommand extends AbstractCommand{
                                         new TTable.ColumnDefine(50)
                                 }
                 )
-                        .addRow("ID", "CPU%", "USR%", "STATE", "THREAD_NAME", "THREAD_STACK")
+                        //.addRow("ID", "CPU%", "USR%", "STATE", "THREAD_NAME", "THREAD_STACK")
+                        .addRow("ID", "USR%", "STATE", "THREAD_NAME", "THREAD_STACK")
                         .padding(1);
 
 

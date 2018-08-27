@@ -8,10 +8,13 @@ import com.gy.woodpecker.enumeration.ClassTypeEnum;
 import com.gy.woodpecker.enumeration.CommandEnum;
 import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 
 import java.lang.instrument.Instrumentation;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * @author guoyang
@@ -42,14 +45,25 @@ public class PrintValueCommand extends AbstractCommand{
     private boolean isFloat = false;
     @NamedArg(name = "d", summary = "the vatiable is double")
     private boolean isDouble = false;
-    @NamedArg(name = "o", summary = "the vatiable is object")
-    private boolean isObject = false;
+//    @NamedArg(name = "o", summary = "the vatiable is object")
+//    private boolean isObject = false;
 
     @NamedArg(name = "b", summary = "the vatiable is boolean")
     private boolean isBoolean = false;
 
-    @NamedArg(name = "n", summary = "is not vatiable")
+    @NamedArg(name = "s", summary = "is not vatiable")
     private boolean isNo = false;
+
+    @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
+    private Integer threshold;
+
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
+    private final AtomicInteger timesRef = new AtomicInteger();
 
     @Override
     public boolean getIfEnhance() {
@@ -92,11 +106,13 @@ public class PrintValueCommand extends AbstractCommand{
                 if(isBoolean){
                     variable = "Boolean.valueOf("+variable+")";
                 }
+                //不打印变量 只在特定行做标记
                 if(isNo){
                     variable = "\""+variable+"\"";
                 }
-                if(isObject){
-                }
+                //默认是对象
+//                if(isObject){
+//                }
 
                 SpyTransformer transformer = new SpyTransformer(methodPattern,false,false,this);
                 inst.addTransformer(transformer, true);
@@ -109,6 +125,11 @@ public class PrintValueCommand extends AbstractCommand{
                 }
             }
         }
+
+        if (has && StringUtils.isNotBlank(output)) {
+            fileWriter = new DailyRollingFileWriter(outPath + output);
+        }
+
         if(!has){
             setRes(has);
         }
@@ -116,10 +137,21 @@ public class PrintValueCommand extends AbstractCommand{
         super.isWait = true;
         return res;
     }
+    //判断是否超过次数
+    private boolean isOverThreshold(int currentTimes) {
+        return null != threshold
+                && currentTimes > threshold;
+    }
     @Override
     public void invokePrint(ClassLoader loader, String className, String methodName,
                             Object printTarget){
-
+        //调用次数判断
+        if (isOverThreshold(timesRef.incrementAndGet())) {
+            //超过设置的调用次数 结束
+            timesRef.set(0);
+            ctxT.writeAndFlush("\n\0");
+            return;
+        }
         final TKv tKv = new TKv(
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(TTable.Align.LEFT));
@@ -133,6 +165,18 @@ public class PrintValueCommand extends AbstractCommand{
         });
 
         tTable.addRow(tKv.rendering());
-        ctxT.writeAndFlush(tKv.rendering());
+        if (StringUtils.isNotBlank(output)) {
+            fileWriter.append(tTable.rendering());
+            fileWriter.flushAppend();
+        } else {
+            ctxT.writeAndFlush(tKv.rendering());
+        }
+    }
+
+    @Override
+    public void destroy() {
+        if(null != fileWriter){
+            fileWriter.closeFile();
+        }
     }
 }

@@ -9,9 +9,11 @@ import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
 import com.gy.woodpecker.textui.ext.TObject;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 
 import java.lang.instrument.Instrumentation;
@@ -32,7 +34,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 "watch -rx 2 org.apache.commons.lang.StringUtils isBlank",
                 "watch -pn 6 org.apache.commons.lang.StringUtils isBlank"
         })
-public class WatchCommand extends AbstractCommand{
+public class WatchCommand extends AbstractCommand {
 
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
     private String classPattern;
@@ -54,6 +56,12 @@ public class WatchCommand extends AbstractCommand{
 
     @NamedArg(name = "n", hasValue = true, summary = "Threshold of execution times")
     private Integer threshold;
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
 
     @Override
     public boolean getIfEnhance() {
@@ -71,24 +79,28 @@ public class WatchCommand extends AbstractCommand{
     public boolean excute(Instrumentation inst) {
         Class[] classes = inst.getAllLoadedClasses();
         boolean has = false;
-        for(Class clazz:classes) {
+        for (Class clazz : classes) {
             if (clazz.getName().equals(classPattern)) {
                 has = true;
-                SpyTransformer transformer = new SpyTransformer(methodPattern,isParam,isReturn,this);
+                SpyTransformer transformer = new SpyTransformer(methodPattern, isParam, isReturn, this);
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);
-                } catch (Exception e){
-                    log.error("执行异常{}",e);
-                }finally {
+                } catch (Exception e) {
+                    log.error("执行异常{}", e);
+                } finally {
                     inst.removeTransformer(transformer);
                 }
             }
+        }
+        if (has && StringUtils.isNotBlank(output)) {
+            fileWriter = new DailyRollingFileWriter(outPath + output);
         }
         //等待结果
         super.isWait = true;
         return has;
     }
+
     private boolean isOverThreshold(int currentTimes) {
         return null != threshold
                 && currentTimes > threshold;
@@ -96,17 +108,16 @@ public class WatchCommand extends AbstractCommand{
 
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
 
-        Advice advice = new Advice(null,className,methodName,args,null,null);
+        Advice advice = new Advice(null, className, methodName, args, null, null);
 
         //调用次数判断
-        if(isOverThreshold(timesRef.incrementAndGet())){
+        if (isOverThreshold(timesRef.incrementAndGet())) {
             //超过设置的调用次数 结束
             timesRef.set(0);
             ctxT.writeAndFlush("\n\0");
             return;
         }
-
-        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
+        print(advice);
     }
 
     @Override
@@ -114,28 +125,47 @@ public class WatchCommand extends AbstractCommand{
                       Object returnObject) throws Throwable {
 
         //调用次数判断
-        if(isOverThreshold(timesRef.incrementAndGet())){
+        if (isOverThreshold(timesRef.incrementAndGet())) {
             //超过设置的调用次数 结束
             timesRef.set(0);
             ctxT.writeAndFlush("\n\0");
             return;
         }
 
-        printReturn(className, methodName, args, returnObject);
+        Advice advice = new Advice(null, className, methodName, args, returnObject, null);
+        print(advice);
+
+        //ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
+//        printReturn(className, methodName, args, returnObject);
     }
 
     @Override
     public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
-                                Object target, Object[] args,Throwable returnObject){
+                                Object target, Object[] args, Throwable returnObject) {
 
-        Advice advice = new Advice(null,className,methodName,args,null,returnObject);
-        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
+        Advice advice = new Advice(null, className, methodName, args, null, returnObject);
+        print(advice);
+//        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
 
-    private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
-
-        Advice advice = new Advice(null,className,methodName,args,returnObject,null);
-        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
+    private void print(Advice advice) {
+        if (StringUtils.isNotBlank(output)) {
+            fileWriter.append(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+            fileWriter.flushAppend();
+        } else {
+            ctxT.writeAndFlush(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+        }
     }
 
+    //    private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
+//
+//        Advice advice = new Advice(null,className,methodName,args,returnObject,null);
+//        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
+//    }
+    @Override
+    public void destroy() {
+        if (null != fileWriter) {
+            fileWriter.closeFile();
+        }
+    }
 }

@@ -6,6 +6,7 @@ import com.gy.woodpecker.command.annotation.NamedArg;
 import com.gy.woodpecker.log.LoggerFacility;
 import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
+import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
 
@@ -18,6 +19,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
+import static java.io.File.separatorChar;
+import static java.lang.System.getProperty;
 import static java.lang.management.MemoryType.HEAP;
 import static java.lang.management.MemoryType.NON_HEAP;
 
@@ -34,8 +37,8 @@ import static java.lang.management.MemoryType.NON_HEAP;
                 "jstat -t 10",
                 "jstat -ta 10"
         })
-public class MemoryCommand extends AbstractCommand{
-    @IndexArg(index = 0, name = "times",isRequired = false ,summary = "timing interval(s)")
+public class MemoryCommand extends AbstractCommand {
+    @IndexArg(index = 0, name = "times", isRequired = false, summary = "timing interval(s)")
     private String times;
 
     @NamedArg(name = "t", summary = "is timer")
@@ -44,13 +47,23 @@ public class MemoryCommand extends AbstractCommand{
     @NamedArg(name = "a", summary = "Display all")
     private boolean isAll = false;
 
+    @NamedArg(name = "o", hasValue = true, summary = "The output path")
+    private String output = "";
+
+    /**
+     * log writer
+     */
+    private DailyRollingFileWriter fileWriter;
+
     ScheduledExecutorService executor = Executors.newScheduledThreadPool(1);
 
     @Override
     public boolean excute(Instrumentation inst) {
-
-        if(isTimer){
-            if(StringUtils.isBlank(times)){
+        if (StringUtils.isNotBlank(output)) {
+            fileWriter = new DailyRollingFileWriter(outPath + output);
+        }
+        if (isTimer) {
+            if (StringUtils.isBlank(times)) {
                 ctxT.writeAndFlush("not timer!\n");
                 return false;
             }
@@ -71,7 +84,7 @@ public class MemoryCommand extends AbstractCommand{
             //等待结果
             super.isWait = true;
             return true;
-        }else{
+        } else {
             printMemory();
             return true;
         }
@@ -86,23 +99,23 @@ public class MemoryCommand extends AbstractCommand{
                 new TTable.ColumnDefine()
         });
         List<MemoryPoolMXBean> mps = ManagementFactory.getMemoryPoolMXBeans();
-        for(MemoryPoolMXBean mp : mps){
+        for (MemoryPoolMXBean mp : mps) {
             final TKv tKv = new TKv(
                     new TTable.ColumnDefine(TTable.Align.RIGHT),
                     new TTable.ColumnDefine(TTable.Align.LEFT));
-            if(isAll){
-                tKv.add("name",mp.getName());
-                tKv.add("Usage",mp.getUsage());
-                tKv.add("CollectionUsage",mp.getCollectionUsage());
-                tKv.add("PeakUsage",mp.getPeakUsage());
+            if (isAll) {
+                tKv.add("name", mp.getName());
+                tKv.add("Usage", mp.getUsage());
+                tKv.add("CollectionUsage", mp.getCollectionUsage());
+                tKv.add("PeakUsage", mp.getPeakUsage());
                 tKv.add("type", mp.getType());
                 tTable.addRow(tKv.rendering());
-            }else {
+            } else {
                 if (mp.getType() == HEAP) {
                     tKv.add("name", mp.getName());
-                    tKv.add("Usage",mp.getUsage());
-                    tKv.add("CollectionUsage",mp.getCollectionUsage());
-                    tKv.add("PeakUsage",mp.getPeakUsage());
+                    tKv.add("Usage", mp.getUsage());
+                    tKv.add("CollectionUsage", mp.getCollectionUsage());
+                    tKv.add("PeakUsage", mp.getPeakUsage());
                     tKv.add("type", mp.getType());
                     tTable.addRow(tKv.rendering());
                 }
@@ -114,16 +127,24 @@ public class MemoryCommand extends AbstractCommand{
             final TKv tKv = new TKv(
                     new TTable.ColumnDefine(TTable.Align.RIGHT),
                     new TTable.ColumnDefine(TTable.Align.LEFT));
-            tKv.add(garbageCollectorMXBean.getName()+" count",garbageCollectorMXBean.getCollectionCount());
-            tKv.add(garbageCollectorMXBean.getName()+" time",garbageCollectorMXBean.getCollectionTime());
+            tKv.add(garbageCollectorMXBean.getName() + " count", garbageCollectorMXBean.getCollectionCount());
+            tKv.add(garbageCollectorMXBean.getName() + " time", garbageCollectorMXBean.getCollectionTime());
             tTable.addRow(tKv.rendering());
         }
 
-        ctxT.writeAndFlush(tTable.rendering());
+        if (StringUtils.isNotBlank(output)) {
+            fileWriter.append(tTable.rendering());
+            fileWriter.flushAppend();
+        } else {
+            ctxT.writeAndFlush(tTable.rendering());
+        }
     }
 
     @Override
-    public void destroy(){
+    public void destroy() {
         executor.shutdownNow();
+        if(null != fileWriter){
+            fileWriter.closeFile();
+        }
     }
 }
