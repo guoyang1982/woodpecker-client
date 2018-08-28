@@ -56,6 +56,12 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
+线上方法调用量太大，跟踪方法会刷屏，并且不能跟踪特定的某个方法调用，可以使用参数表达式解决：
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params1.jpg)
+如果是对象的话：
+![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params2.jpg)
+
+
 说明：
     []中括号里以逗号分隔成两个耗时，前面表示从调用链第1条到本方法执行完毕的总耗时，后面表示本方法自身的耗时，@后面是行号，第一条括号里面的是总共耗时。
     trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。
