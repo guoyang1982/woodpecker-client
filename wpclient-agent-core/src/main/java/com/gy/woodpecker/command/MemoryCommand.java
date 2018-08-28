@@ -34,6 +34,7 @@ import static java.lang.management.MemoryType.NON_HEAP;
         eg = {
                 "jstat",
                 "jstat -a",
+                "jstat -ao jstat.log",
                 "jstat -t 10",
                 "jstat -ta 10"
         })

@@ -31,6 +31,7 @@ import static com.gy.woodpecker.tools.GaCheckUtils.isEquals;
 @Cmd(name = "monitor", sort = 18, summary = "Monitor the execution of specified Class and its method",
         eg = {
                 "monitor -c 5 org.apache.commons.lang.StringUtils isBlank",
+                "monitor -c 5 -o monitor.log org.apache.commons.lang.StringUtils isBlank"
         })
 public class MonitorCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")

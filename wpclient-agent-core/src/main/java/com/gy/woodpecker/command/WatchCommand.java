@@ -33,6 +33,8 @@ import java.util.concurrent.atomic.AtomicInteger;
                 "watch -r org.apache.commons.lang.StringUtils isBlank",
                 "watch -rj org.apache.commons.lang.StringUtils isBlank",
                 "watch -rx 2 org.apache.commons.lang.StringUtils isBlank",
+                "watch -rx 2 -o watch.log org.apache.commons.lang.StringUtils isBlank",
+                "watch -rx 2 org.apache.commons.lang.StringUtils isBlank params[0]==123",
                 "watch -pn 6 org.apache.commons.lang.StringUtils isBlank"
         })
 public class WatchCommand extends AbstractCommand {

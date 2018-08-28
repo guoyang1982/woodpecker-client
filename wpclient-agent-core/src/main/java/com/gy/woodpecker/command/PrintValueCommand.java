@@ -26,7 +26,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 @Slf4j
 @Cmd(name = "print", sort = 16, summary = "Get the variables in the method",
         eg = {
-                "print org.apache.commons.lang.StringUtils isBlank linenumber variable"
+                "print org.apache.commons.lang.StringUtils isBlank linenumber variable",
+                "print -o print.log org.apache.commons.lang.StringUtils isBlank linenumber variable",
+                "print -n 3 org.apache.commons.lang.StringUtils isBlank linenumber variable",
+                "print org.apache.commons.lang.StringUtils isBlank linenumber variable params[3]==456"
         })
 public class PrintValueCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")

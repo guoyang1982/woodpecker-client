@@ -26,7 +26,8 @@ import static com.gy.woodpecker.tools.GaStringUtils.getThreadInfo;
 @Slf4j
 @Cmd(name = "stack", sort = 15, summary = "Display the stack trace of specified class and method",
         eg = {
-                "stack org.apache.commons.lang.StringUtils isBlank"
+                "stack org.apache.commons.lang.StringUtils isBlank",
+                "stack -o stack.log org.apache.commons.lang.StringUtils isBlank"
         })
 public class StackCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")

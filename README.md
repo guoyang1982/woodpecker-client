@@ -52,7 +52,7 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/loglevel.jpg)
 
 ### 3.trace命令
-查看方法调用路径和耗时
+查看方法调用路径和耗时,支持输出结果到文件，参数-o trace.log,看例子:help trace.
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
@@ -71,6 +71,7 @@ userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].na
 
 ### 4.watch命令
 如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。也可以支持参数表达式，如trace命令。
+支持输出结果到文件，参数-o watch.log,看例子:help watch.
 参数p是返回所有入参，x是层次展示
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-px.jpg)
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
@@ -90,7 +91,7 @@ userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].na
 查询jvm的详细信息。
 
 ### 9.top命令
-查看应用线程占用cpu时间，能够排查占用cpu时间最大的线程栈，进而追踪到有问题的代码，同jstack
+查看应用线程占用cpu时间，能够排查占用cpu时间最大的线程栈，进而追踪到有问题的代码.支持输出结果到文件，参数-o top.log,看例子:help top.
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/top.jpg)
 
 ### 10.jstat
@@ -102,6 +103,7 @@ userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].na
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/stack.jpg)
 ### 12.print命令
 pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。也可以支持参数表达式，如trace命令。
+支持输出结果到文件，参数-o print.log,看例子:help print.
 适合：服务在启动后，出现问题急切需要知道变量的值而不需要重新打印log日志重启服务。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/print.jpg)
 说明：
@@ -112,10 +114,14 @@ channelList:方法名
 80:插入代码的行号
 user:要打印的变量
 ### 13.monitor监控命令
-监控命令,监控接口调用率。
+监控命令,监控接口调用率。支持输出结果到文件，参数-o monitor.log,看例子:help monitor.
 参数：-c 时间秒
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/monitor.jpg)
-
+### 14.scan命令
+扫描系统内最耗时的方法。支持输出结果到文件，参数-o scan.log,看例子:help scan.
+参数：-c 时间秒
+例子：scan -c 5 包名
+就会找出这个包名下的所有类里的最耗时的方法。建议一次扫描的类不要太多。-c 5，指的是每5秒一次统计输出。
 
 # 日志案例
     以下是实际项目使用的异常收集服务：

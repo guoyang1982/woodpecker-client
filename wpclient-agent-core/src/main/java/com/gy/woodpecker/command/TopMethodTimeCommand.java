@@ -21,8 +21,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static com.gy.woodpecker.tools.GaCheckUtils.isEquals;
-import static java.io.File.separatorChar;
-import static java.lang.System.getProperty;
+
 
 /**
  * @author guoyang
@@ -33,6 +32,7 @@ import static java.lang.System.getProperty;
 @Cmd(name = "scan", sort = 19, summary = "scan the execution of specified Class and its all method",
         eg = {
                 "scan -c 5 org.apache.commons.lang.StringUtils",
+                "scan -c 5 -o scan.log org.apache.commons.lang.StringUtils"
         })
 public class TopMethodTimeCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")

@@ -39,6 +39,7 @@ import static com.gy.woodpecker.tools.GaStringUtils.tranClassName;
 @Cmd(name = "trace", sort = 14, summary = "Display the detailed thread stack of specified class and method",
         eg = {
                 "trace org.apache.commons.lang.StringUtils isBlank",
+                "trace -o trace.log org.apache.commons.lang.StringUtils isBlank",
                 "trace org.apache.commons.lang.StringUtils isBlank cost>5",
                 "trace -n 2 org.apache.commons.lang.StringUtils isBlank",
                 "trace org.apache.commons.lang.StringUtils isBlank params[0]=='gg'"
