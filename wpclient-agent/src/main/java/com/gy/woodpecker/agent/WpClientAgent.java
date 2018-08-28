@@ -116,6 +116,7 @@ public class WpClientAgent {
                             ClassLoader.class,
                             String.class,
                             String.class,
+                            Object[].class,
                             Object.class
                     )
             );

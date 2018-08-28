@@ -67,7 +67,7 @@ public abstract class AbstractCommand implements Command{
     public void invokeAfterTracing(int lineNumber, String owner, String name, String desc){
     }
     @Override
-    public void invokePrint(ClassLoader loader, String className, String methodName,
+    public void invokePrint(ClassLoader loader, String className, String methodName,Object[] args,
                      Object printTarget){
     }
     @Override

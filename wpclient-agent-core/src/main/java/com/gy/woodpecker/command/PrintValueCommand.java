@@ -1,6 +1,7 @@
 package com.gy.woodpecker.command;
 
 import com.alibaba.fastjson.JSON;
+import com.gy.woodpecker.Advice;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
@@ -12,6 +13,7 @@ import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.mvel2.MVEL;
 
 import java.lang.instrument.Instrumentation;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -26,7 +28,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         eg = {
                 "print org.apache.commons.lang.StringUtils isBlank linenumber variable"
         })
-public class PrintValueCommand extends AbstractCommand{
+public class PrintValueCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
     private String classPattern;
     @IndexArg(index = 1, name = "method-pattern", summary = "Method of Pattern Matching")
@@ -36,6 +38,10 @@ public class PrintValueCommand extends AbstractCommand{
     private String lineNumber;
     @IndexArg(index = 3, name = "variable", summary = "The variables you need to print")
     private String variable;
+
+    @IndexArg(index = 4, name = "condition-express", isRequired = false,
+            summary = "Conditional expression")
+    private String conditionExpress;
 
     @NamedArg(name = "i", summary = "the vatiable is int")
     private boolean isInt = false;
@@ -79,8 +85,9 @@ public class PrintValueCommand extends AbstractCommand{
     public String getValue() {
         return variable;
     }
+
     @Override
-    public String getLineNumber(){
+    public String getLineNumber() {
         return lineNumber;
     }
 
@@ -88,39 +95,39 @@ public class PrintValueCommand extends AbstractCommand{
     public boolean excute(Instrumentation inst) {
         Class[] classes = inst.getAllLoadedClasses();
         boolean has = false;
-        for(Class clazz:classes) {
+        for (Class clazz : classes) {
             if (clazz.getName().equals(classPattern)) {
                 has = true;
-                if(isInt){
-                    variable = "Integer.valueOf("+variable+")";
+                if (isInt) {
+                    variable = "Integer.valueOf(" + variable + ")";
                 }
-                if(isLong){
-                    variable = "Long.valueOf("+variable+")";
+                if (isLong) {
+                    variable = "Long.valueOf(" + variable + ")";
                 }
-                if(isFloat){
-                    variable = "Float.valueOf("+variable+")";
+                if (isFloat) {
+                    variable = "Float.valueOf(" + variable + ")";
                 }
-                if(isDouble){
-                    variable = "Double.valueOf("+variable+")";
+                if (isDouble) {
+                    variable = "Double.valueOf(" + variable + ")";
                 }
-                if(isBoolean){
-                    variable = "Boolean.valueOf("+variable+")";
+                if (isBoolean) {
+                    variable = "Boolean.valueOf(" + variable + ")";
                 }
                 //不打印变量 只在特定行做标记
-                if(isNo){
-                    variable = "\""+variable+"\"";
+                if (isNo) {
+                    variable = "\"" + variable + "\"";
                 }
                 //默认是对象
 //                if(isObject){
 //                }
 
-                SpyTransformer transformer = new SpyTransformer(methodPattern,false,false,this);
+                SpyTransformer transformer = new SpyTransformer(methodPattern, false, false, this);
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);
-                } catch (Exception e){
-                    log.error("执行PrintValueCommand异常{}",e);
-                }finally {
+                } catch (Exception e) {
+                    log.error("执行PrintValueCommand异常{}", e);
+                } finally {
                     inst.removeTransformer(transformer);
                 }
             }
@@ -130,21 +137,23 @@ public class PrintValueCommand extends AbstractCommand{
             fileWriter = new DailyRollingFileWriter(outPath + output);
         }
 
-        if(!has){
+        if (!has) {
             setRes(has);
         }
         //等待结果
         super.isWait = true;
         return res;
     }
+
     //判断是否超过次数
     private boolean isOverThreshold(int currentTimes) {
         return null != threshold
                 && currentTimes > threshold;
     }
+
     @Override
-    public void invokePrint(ClassLoader loader, String className, String methodName,
-                            Object printTarget){
+    public void invokePrint(ClassLoader loader, String className, String methodName, Object[] args,
+                            Object printTarget) {
         //调用次数判断
         if (isOverThreshold(timesRef.incrementAndGet())) {
             //超过设置的调用次数 结束
@@ -152,12 +161,13 @@ public class PrintValueCommand extends AbstractCommand{
             ctxT.writeAndFlush("\n\0");
             return;
         }
+
         final TKv tKv = new TKv(
                 new TTable.ColumnDefine(TTable.Align.RIGHT),
                 new TTable.ColumnDefine(TTable.Align.LEFT));
-        tKv.add("className",className);
-        tKv.add("methodName",methodName);
-        tKv.add("variable",variable);
+        tKv.add("className", className);
+        tKv.add("methodName", methodName);
+        tKv.add("variable", variable);
         tKv.add("value", JSON.toJSONString(printTarget));
 
         final TTable tTable = new TTable(new TTable.ColumnDefine[]{
@@ -165,6 +175,30 @@ public class PrintValueCommand extends AbstractCommand{
         });
 
         tTable.addRow(tKv.rendering());
+
+        if (StringUtils.isNotBlank(conditionExpress)) {
+            if (conditionExpress.startsWith("params")) {
+                Advice advice = new Advice(null, null, null, args, null, null);
+                try {
+                    Boolean res = (Boolean) MVEL.eval(conditionExpress, advice);
+                    if (res.booleanValue()) {
+                        print(tKv, tTable);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ctxT.writeAndFlush("condition-express is fail!\n\0");
+                    return;
+                }
+            } else {
+                ctxT.writeAndFlush("condition-express is fail!\n\0");
+                return;
+            }
+        } else {
+            print(tKv, tTable);
+        }
+    }
+
+    private void print(TKv tKv, TTable tTable) {
         if (StringUtils.isNotBlank(output)) {
             fileWriter.append(tTable.rendering());
             fileWriter.flushAppend();
@@ -175,7 +209,7 @@ public class PrintValueCommand extends AbstractCommand{
 
     @Override
     public void destroy() {
-        if(null != fileWriter){
+        if (null != fileWriter) {
             fileWriter.closeFile();
         }
     }

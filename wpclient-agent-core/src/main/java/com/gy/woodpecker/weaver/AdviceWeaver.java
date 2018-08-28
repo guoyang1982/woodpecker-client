@@ -186,14 +186,14 @@ public class AdviceWeaver {
      * @param printTarget
      */
     public static void printMethod(int adviceId,
-                                   ClassLoader loader, String className, String methodName,
+                                   ClassLoader loader, String className, String methodName,Object[] args,
                                    Object printTarget){
         if (!advices.containsKey(adviceId)) {
             return;
         }
         Command command = advices.get(adviceId);
         try{
-            command.invokePrint(loader, className,methodName,printTarget);
+            command.invokePrint(loader, className,methodName,args,printTarget);
         }catch (Exception e){
             log.error("printMethod fail!{}",e);
         }

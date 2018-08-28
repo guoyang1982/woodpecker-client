@@ -103,10 +103,10 @@ public class Spy {
     }
 
     public static void printMethod(int adviceId,
-                                   ClassLoader loader, String className, String methodName,
+                                   ClassLoader loader, String className, String methodName,Object[] args,
                                    Object printTarget){
         try {
-            PRINT_METHOD.invoke(null, adviceId,loader,className,methodName,printTarget);
+            PRINT_METHOD.invoke(null, adviceId,loader,className,methodName,args,printTarget);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {

@@ -243,9 +243,8 @@ public class SpyTransformer implements ClassFileTransformer {
 
         if (command.getCommandType().equals(CommandEnum.PRINT)) {
             String objPrintValue = command.getValue();
-            String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\"," + objPrintValue + ");";
+            String printInfo = "com.gy.woodpecker.agent.Spy.printMethod(" + command.getSessionId() + "," + classLoad + ",\"" + className + "\",\"" + m.getName() + "\",$args," + objPrintValue + ");";
             m.insertAt(Integer.parseInt(command.getLineNumber()), printInfo);
-
         }
 
         StringBuffer beforeBody = new StringBuffer();

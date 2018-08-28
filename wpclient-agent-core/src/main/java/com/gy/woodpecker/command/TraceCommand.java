@@ -1,5 +1,6 @@
 package com.gy.woodpecker.command;
 
+import com.gy.woodpecker.Advice;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
@@ -10,11 +11,18 @@ import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.mvel2.MVEL;
+import org.mvel2.integration.VariableResolverFactory;
+import org.mvel2.integration.impl.MapVariableResolverFactory;
 
+import javax.script.Bindings;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.Serializable;
 import java.lang.instrument.Instrumentation;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.gy.woodpecker.tools.GaStringUtils.getThreadInfo;
@@ -30,7 +38,8 @@ import static com.gy.woodpecker.tools.GaStringUtils.tranClassName;
         eg = {
                 "trace org.apache.commons.lang.StringUtils isBlank",
                 "trace org.apache.commons.lang.StringUtils isBlank cost>5",
-                "trace -n 2 org.apache.commons.lang.StringUtils isBlank"
+                "trace -n 2 org.apache.commons.lang.StringUtils isBlank",
+                "trace org.apache.commons.lang.StringUtils isBlank params[0]=='gg'"
         })
 public class TraceCommand extends AbstractCommand {
     @IndexArg(index = 0, name = "class-pattern", summary = "Path and classname of Pattern Matching")
@@ -116,7 +125,7 @@ public class TraceCommand extends AbstractCommand {
     @Override
     public void after(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args,
                       Object returnObject) throws Throwable {
-        printResult();
+        printResult(args);
     }
 
     private boolean isOverThreshold(int currentTimes) {
@@ -124,7 +133,7 @@ public class TraceCommand extends AbstractCommand {
                 && currentTimes > threshold;
     }
 
-    private void printResult() {
+    private void printResult(Object[] args) {
         final Trace trace = traceRef.get();
         if (null == trace) {
             return;
@@ -146,43 +155,79 @@ public class TraceCommand extends AbstractCommand {
         //时间判断
         if (StringUtils.isNotBlank(conditionExpress)) {
             //符合表达式时间的才输出
-            ScriptEngine engine = manager.getEngineByName("js");
-            engine.put("cost", cost);
-            try {
-                Boolean res = (Boolean) engine.eval(conditionExpress);
-                if (res.booleanValue()) {
-                    final Trace traceR = traceRef.get();
-                    String result = traceR.tTree.rendering();
-                    if (cost != null) {
-                        result = result.replaceFirst("costTime", String.valueOf(cost));
+//            ScriptEngine engine = manager.getEngineByName("js");
+//            engine.put("cost", cost);
+            Object obj = null;
+            if (conditionExpress.startsWith("cost")) {
+                Map<String, Long> map = new HashMap();
+                map.put("cost", cost);
+                obj = map;
+            }
+            if (conditionExpress.startsWith("params")) {
+                Advice advice = new Advice(null, null, null, args, null, null);
+                obj = advice;
+            }
 
+            if (null != obj) {
+                try {
+                    //Boolean res = (Boolean) engine.eval(conditionExpress);
+                    Boolean res = (Boolean) MVEL.eval(conditionExpress, obj);
+                    if (res.booleanValue()) {
+                        print(cost);
                     }
-                    if (StringUtils.isNotBlank(output)) {
-                        fileWriter.append(result);
-                        fileWriter.flushAppend();
-                    } else {
-                        ctxT.writeAndFlush(result);
-                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ctxT.writeAndFlush("condition-express is fail!\n\0");
+                    return;
                 }
-
-            } catch (ScriptException e) {
-                e.printStackTrace();
+            }else {
+                ctxT.writeAndFlush("condition-express is fail!\n\0");
+                return;
             }
+
         } else {
-            final Trace traceR = traceRef.get();
-            String result = traceR.tTree.rendering();
-            if (cost != null) {
-                result = result.replaceFirst("costTime", String.valueOf(cost));
-
-            }
-            if (StringUtils.isNotBlank(output)) {
-                fileWriter.append(result);
-                fileWriter.flushAppend();
-            } else {
-                ctxT.writeAndFlush(result);
-            }
+            print(cost);
         }
 
+    }
+
+//    public static void main(String args[]) {
+//        //ScriptEngineManager manager = new ScriptEngineManager();
+//        Map map = new HashMap();
+//        map.put("a", 123);
+//        map.put("b", "ddd");
+//        Object[] args1 = {13123, "ddddd", map};
+//        Advice advice = new Advice(null, null, null, args1, null, null);
+//
+//        //解释模式
+//        long c = System.currentTimeMillis();
+//
+//        // Map context = new HashMap();
+//        String expression = "params[1]==111";
+////        VariableResolverFactory functionFactory = new MapVariableResolverFactory(context);
+////        context.put("advice", advice);
+////        Map map1 = new HashMap();
+////        map1.put("cost", 2);
+//        Boolean result = (Boolean) MVEL.eval(expression, advice);
+//        System.out.println(result);
+//
+//        System.out.println(System.currentTimeMillis() - c);
+//    }
+
+
+    private void print(Long cost) {
+        final Trace traceR = traceRef.get();
+        String result = traceR.tTree.rendering();
+        if (cost != null) {
+            result = result.replaceFirst("costTime", String.valueOf(cost));
+
+        }
+        if (StringUtils.isNotBlank(output)) {
+            fileWriter.append(result);
+            fileWriter.flushAppend();
+        } else {
+            ctxT.writeAndFlush(result);
+        }
     }
 
 
@@ -190,7 +235,7 @@ public class TraceCommand extends AbstractCommand {
     public void afterOnThrowing(ClassLoader loader, String className, String methodName, String methodDesc,
                                 Object target, Object[] args, Throwable returnObject) {
 
-        printResult();
+        printResult(args);
     }
 
     @Override

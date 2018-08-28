@@ -14,6 +14,7 @@ import com.gy.woodpecker.transformer.SpyTransformer;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
+import org.mvel2.MVEL;
 import org.slf4j.Logger;
 
 import java.lang.instrument.Instrumentation;
@@ -41,6 +42,10 @@ public class WatchCommand extends AbstractCommand {
 
     @IndexArg(index = 1, name = "method-pattern", summary = "Method of Pattern Matching")
     private String methodPattern;
+
+    @IndexArg(index = 2, name = "condition-express", isRequired = false,
+            summary = "Conditional expression")
+    private String conditionExpress;
 
     @NamedArg(name = "p", summary = "Watch the parameter")
     private boolean isParam = false;
@@ -135,8 +140,6 @@ public class WatchCommand extends AbstractCommand {
         Advice advice = new Advice(null, className, methodName, args, returnObject, null);
         print(advice);
 
-        //ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
-//        printReturn(className, methodName, args, returnObject);
     }
 
     @Override
@@ -145,23 +148,40 @@ public class WatchCommand extends AbstractCommand {
 
         Advice advice = new Advice(null, className, methodName, args, null, returnObject);
         print(advice);
-//        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
     }
 
     private void print(Advice advice) {
-        if (StringUtils.isNotBlank(output)) {
-            fileWriter.append(new TObject(advice, expend, isUsingJson).rendering() + "\n");
-            fileWriter.flushAppend();
+        if (StringUtils.isNotBlank(conditionExpress)) {
+            if(conditionExpress.startsWith("params")){
+                try {
+                    Boolean res = (Boolean) MVEL.eval(conditionExpress, advice);
+                    if (res.booleanValue()) {
+                        if (StringUtils.isNotBlank(output)) {
+                            fileWriter.append(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+                            fileWriter.flushAppend();
+                        } else {
+                            ctxT.writeAndFlush(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    ctxT.writeAndFlush("condition-express is fail!\n\0");
+                    return;
+                }
+            }else {
+                ctxT.writeAndFlush("condition-express is fail!\n\0");
+                return;
+            }
         } else {
-            ctxT.writeAndFlush(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+            if (StringUtils.isNotBlank(output)) {
+                fileWriter.append(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+                fileWriter.flushAppend();
+            } else {
+                ctxT.writeAndFlush(new TObject(advice, expend, isUsingJson).rendering() + "\n");
+            }
         }
     }
 
-    //    private void printReturn(String className, String methodName, Object[] args, Object returnObject) {
-//
-//        Advice advice = new Advice(null,className,methodName,args,returnObject,null);
-//        ctxT.writeAndFlush(new TObject(advice,expend,isUsingJson).rendering()+"\n");
-//    }
     @Override
     public void destroy() {
         if (null != fileWriter) {

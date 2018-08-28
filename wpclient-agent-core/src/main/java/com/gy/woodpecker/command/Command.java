@@ -70,7 +70,7 @@ public interface Command {
 
     void invokeAfterTracing(int lineNumber, String owner, String name, String desc);
 
-    void invokePrint(ClassLoader loader, String className, String methodName,
+    void invokePrint(ClassLoader loader, String className, String methodName,Object[] args,
                 Object printTarget);
 
     void invokeThrowTracing(int lineNumber, String owner, String name, String desc, Object throwException);
