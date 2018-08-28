@@ -4,7 +4,9 @@ import com.gy.woodpecker.Advice;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.enumeration.CommandEnum;
+import com.gy.woodpecker.session.SessionManager;
 import com.gy.woodpecker.textui.TTree;
 import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
@@ -146,9 +148,10 @@ public class TraceCommand extends AbstractCommand {
 
         //调用次数判断
         if (isOverThreshold(timesRef.incrementAndGet())) {
+            //恢复类
+            rollbackClass();
             //超过设置的调用次数 结束
             timesRef.set(0);
-            ctxT.writeAndFlush("\n\0");
             return;
         }
 
@@ -176,12 +179,16 @@ public class TraceCommand extends AbstractCommand {
                         print(cost);
                     }
                 } catch (Exception e) {
-                    e.printStackTrace();
-                    ctxT.writeAndFlush("condition-express is fail!\n\0");
+                    //e.printStackTrace();
+                    //恢复类
+                    rollbackClass();
+                    ctxT.writeAndFlush("condition-express is fail!\n");
                     return;
                 }
             }else {
-                ctxT.writeAndFlush("condition-express is fail!\n\0");
+                //恢复类
+                rollbackClass();
+                ctxT.writeAndFlush("condition-express is fail!\n");
                 return;
             }
 

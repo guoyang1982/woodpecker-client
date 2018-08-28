@@ -1,8 +1,10 @@
 package com.gy.woodpecker.command;
 
 import com.gy.woodpecker.command.annotation.IndexArg;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.enumeration.ClassTypeEnum;
 import com.gy.woodpecker.enumeration.CommandEnum;
+import com.gy.woodpecker.session.SessionManager;
 import com.gy.woodpecker.tools.ConfigPropertyUtile;
 import io.netty.channel.ChannelHandlerContext;
 import org.apache.commons.lang.StringUtils;
@@ -97,6 +99,16 @@ public abstract class AbstractCommand implements Command{
         this.res = res;
     }
 
+    /**
+     * 恢复类
+     */
+    public void rollbackClass(){
+        ResetCommand resetCommand = new ResetCommand();
+        resetCommand.setCtxT(ctxT);
+        resetCommand.setSessionId(SessionManager.getSessionId(ctxT));
+        resetCommand.excute(ContextConfig.inst);
+        ctxT.writeAndFlush("\n\0");
+    }
 
     public void doAction(ChannelHandlerContext ctx, Instrumentation inst) {
         this.ctxT = ctx;

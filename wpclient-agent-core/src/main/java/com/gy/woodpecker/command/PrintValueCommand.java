@@ -156,9 +156,9 @@ public class PrintValueCommand extends AbstractCommand {
                             Object printTarget) {
         //调用次数判断
         if (isOverThreshold(timesRef.incrementAndGet())) {
+            rollbackClass();
             //超过设置的调用次数 结束
             timesRef.set(0);
-            ctxT.writeAndFlush("\n\0");
             return;
         }
 
@@ -186,11 +186,13 @@ public class PrintValueCommand extends AbstractCommand {
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
-                    ctxT.writeAndFlush("condition-express is fail!\n\0");
+                    rollbackClass();
+                    ctxT.writeAndFlush("condition-express is fail!\n");
                     return;
                 }
             } else {
-                ctxT.writeAndFlush("condition-express is fail!\n\0");
+                rollbackClass();
+                ctxT.writeAndFlush("condition-express is fail!\n");
                 return;
             }
         } else {

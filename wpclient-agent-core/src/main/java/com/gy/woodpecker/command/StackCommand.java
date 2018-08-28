@@ -93,9 +93,9 @@ public class StackCommand extends AbstractCommand {
     public void before(ClassLoader loader, String className, String methodName, String methodDesc, Object target, Object[] args) throws Throwable {
         //调用次数判断
         if (isOverThreshold(timesRef.incrementAndGet())) {
+            rollbackClass();
             //超过设置的调用次数 结束
             timesRef.set(0);
-            ctxT.writeAndFlush("\n\0");
             return;
         }
         stackInfoRef.set(getStack(getTitle()));
