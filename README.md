@@ -60,9 +60,9 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params1.jpg)
 如果是对象的话：
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params2.jpg)
-params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list
+    params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list
 对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。如上面的params[0]==227854954,我跟踪的方法第一个参数是
-userid，也就是只跟踪userid=227854954的方法调用。而params[0][0].name='lms'，是我跟踪的方法第一个参数是list，而list里有对象，对象里有属性name，所以
+userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].name=='lms'，是我跟踪的方法第一个参数是list，而list里有对象，对象里有属性name，所以
 指的是只跟踪方法第一个参数，list里第一个对象的属性值name为lms的方法调用。依此类推。表达式是用mvel实现的。
 
 说明：
