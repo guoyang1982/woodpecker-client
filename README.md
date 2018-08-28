@@ -61,14 +61,14 @@
 如果是对象的话：
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params2.jpg)
 params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list
-对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。
+对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。表达式是用mvel实现的。
 
 说明：
     []中括号里以逗号分隔成两个耗时，前面表示从调用链第1条到本方法执行完毕的总耗时，后面表示本方法自身的耗时，@后面是行号，第一条括号里面的是总共耗时。
     trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。
 
 ### 4.watch命令
-如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。
+如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。也可以支持参数表达式，如trace命令
 参数p是返回所有入参，x是层次展示
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/watch-px.jpg)
 参数r是返回返回值 包括异常，也会返回入参(但是代码中对入参进行修改了，就是修改后的值)
@@ -99,7 +99,7 @@ params代表参数，是个数组有几个参数，数组长度就为几，param
 查看方法的线程栈，当不知道方法的调用路径时，这个比较不错，尤其对二方包等。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/stack.jpg)
 ### 12.print命令
-pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。
+pring命令可以在类的某个方法里打印变量值包括局部和成员变量，支持打印对象，int，long，等值，看命令参数。也可以支持参数表达式如trace命令。
 适合：服务在启动后，出现问题急切需要知道变量的值而不需要重新打印log日志重启服务。
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/print.jpg)
 说明：
