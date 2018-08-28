@@ -92,7 +92,7 @@ public class NettyConnetManageHandler extends ChannelDuplexHandler {
                 ctx.channel().writeAndFlush("\1").addListener(new ChannelFutureListener() {
                     public void operationComplete(ChannelFuture f) throws Exception {
                         if (f.isSuccess()) {
-                            log.info("ping success!");
+                            //log.info("ping success!");
                             return;
                         } else {
                             int sessionId = SessionManager.getSessionId(ctx);
