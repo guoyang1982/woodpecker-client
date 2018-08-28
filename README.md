@@ -60,7 +60,8 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params1.jpg)
 如果是对象的话：
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params2.jpg)
-
+params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list
+对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。
 
 说明：
     []中括号里以逗号分隔成两个耗时，前面表示从调用链第1条到本方法执行完毕的总耗时，后面表示本方法自身的耗时，@后面是行号，第一条括号里面的是总共耗时。
