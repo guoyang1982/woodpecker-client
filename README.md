@@ -56,9 +56,8 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace.jpg)
 
 说明：
-`[]中括号里以逗号分隔成两个耗时，前面表示从调用链第1条到本方法执行完毕的总耗时，后面表示本方法自身的耗时，@后面是行号，第一条括号里面的是总共耗时。
-    trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。`
-    
+  `[]中括号里以逗号分隔成两个耗时，前面表示从调用链第1条到本方法执行完毕的总耗时，后面表示本方法自身的耗时，@后面是行号，第一条括号里面的是总共耗时。trace命令可以看方法内部的执行路径。如果发生异常可以提示异常类型。目前只支持一级方法内部情况。`
+  
 根据条件过滤，如：只打印大于耗时1ms以上的，支持各种表达式
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/trace_cost.jpg)
 线上方法调用量太大，跟踪方法会刷屏，并且不能跟踪特定的某个方法调用，可以使用参数表达式解决：
@@ -67,13 +66,8 @@
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/params2.jpg)
 
 说明：
-  `params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list
-对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。如上面的params[0]==227854954,我跟踪的方法第一个参数是
-userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].name=='lms'，是我跟踪的方法第一个参数是list，而list里有对象，对象里有属性name，所以
-指的是只跟踪方法第一个参数，list里第一个对象的属性值name为lms的方法调用。依此类推。表达式是用mvel实现的。`
-
-
-
+  `params代表参数，是个数组有几个参数，数组长度就为几，params[0]代表第一个参数，如果这个参数是个list对象，可以params[0][0],代表list对象里的第一个值，如果这个值是对象，可以params[0][0].name代表这个对象里的name属性。如上面的params[0]==227854954,我跟踪的方法第一个参数是userid，也就是只跟踪userid==227854954的方法调用。而params[0][0].name=='lms'，是我跟踪的方法第一个参数是list，而list里有对象，对象里有属性name，所以指的是只跟踪方法第一个参数，list里第一个对象的属性值name为lms的方法调用。依此类推。表达式是用mvel实现的。`
+  
 ### 4.watch命令
 如果方法发生异常等错误，需要查看方法的入参和返回值，可以用这个命令。也可以支持参数表达式，如trace命令。
 支持输出结果到文件，参数-o watch.log,看例子:help watch.
