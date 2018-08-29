@@ -108,7 +108,7 @@ pring命令可以在类的某个方法里打印变量值包括局部和成员变
 ![Aaron Swartz](https://github.com/guoyang1982/woodpecker-client/blob/master/doc/print.jpg)
 说明：
 print：命令名
--o:为参数，支持其他参数 查 help print
+参数:包含-i,-l,-d等，支持其他参数 查 help print，这些参数主要为了打印基本类型的变量，-i就是int，-l就是long，默认是对象
 com.*.ope.controller.*:类名 全路径 目前不支持正则匹配
 channelList:方法名
 80:插入代码的行号
