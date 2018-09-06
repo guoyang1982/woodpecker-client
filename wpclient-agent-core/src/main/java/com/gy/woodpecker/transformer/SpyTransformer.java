@@ -29,11 +29,11 @@ import static org.apache.commons.io.FileUtils.writeByteArrayToFile;
 public class SpyTransformer implements ClassFileTransformer {
 
     // 类-字节码缓存
-    private final static Map<Class<?>/*Class*/, byte[]/*bytes of Class*/> classBytesCache
-            = new WeakHashMap<Class<?>, byte[]>();
-
-    public final static Map<Integer, List> classNameCache
-            = new HashMap<Integer, List>();
+//    private final static Map<Class<?>/*Class*/, byte[]/*bytes of Class*/> classBytesCache
+//            = new WeakHashMap<Class<?>, byte[]>();
+//
+//    public final static Map<Integer, List> classNameCache
+//            = new HashMap<Integer, List>();
     private static final String WORKING_DIR = getProperty("user.home");
 
     String methodName;
@@ -67,10 +67,10 @@ public class SpyTransformer implements ClassFileTransformer {
 
         className = className.replace('/', '.');
 
-        List classNames = classNameCache.get(command.getSessionId());
+        List classNames = ContextConfig.classNameCache.get(command.getSessionId());
         if (null == classNames) {
             classNames = new ArrayList();
-            classNameCache.put(command.getSessionId(), classNames);
+            ContextConfig.classNameCache.put(command.getSessionId(), classNames);
         }
 
         if (!classNames.contains(classBeingRedefined)) {
@@ -82,7 +82,7 @@ public class SpyTransformer implements ClassFileTransformer {
         }
         byteCode = aopLog(loader, className, byteCode);
 
-        classBytesCache.put(classBeingRedefined, byteCode);
+        //classBytesCache.put(classBeingRedefined, byteCode);
         return byteCode;
     }
 

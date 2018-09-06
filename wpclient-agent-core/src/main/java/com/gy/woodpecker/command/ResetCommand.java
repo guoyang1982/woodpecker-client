@@ -3,6 +3,7 @@ package com.gy.woodpecker.command;
 import com.gy.woodpecker.command.annotation.Cmd;
 import com.gy.woodpecker.command.annotation.IndexArg;
 import com.gy.woodpecker.command.annotation.NamedArg;
+import com.gy.woodpecker.config.ContextConfig;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import com.gy.woodpecker.weaver.AdviceWeaver;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class ResetCommand extends AbstractCommand {
 
     @Override
     public boolean excute(Instrumentation inst) {
-        Map<Integer, List> classNames = SpyTransformer.classNameCache;
+        Map<Integer, List> classNames = ContextConfig.classNameCache;
         if (classNames.size() == 0) {
             //还需要清空一遍命令
             Map<Integer, Command> mapCommand = AdviceWeaver.getAdvices();

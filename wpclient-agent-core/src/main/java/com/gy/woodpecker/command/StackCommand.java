@@ -8,6 +8,7 @@ import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
 import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
+import com.gy.woodpecker.transformer.SpyAsmTransformer;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -62,7 +63,8 @@ public class StackCommand extends AbstractCommand {
         for (Class clazz : classes) {
             if (clazz.getName().equals(classPattern)) {
                 has = true;
-                SpyTransformer transformer = new SpyTransformer(methodPattern, true, true, this);
+                SpyAsmTransformer transformer = new SpyAsmTransformer(this,methodPattern,true,true);
+                //SpyTransformer transformer = new SpyTransformer(methodPattern, true, true, this);
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);

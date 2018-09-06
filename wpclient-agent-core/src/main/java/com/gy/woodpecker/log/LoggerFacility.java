@@ -172,9 +172,9 @@ public class LoggerFacility {
             public void run() {
                 try {
                     String tempStr = msg;
-                    if(null != t){
+                    if (null != t) {
                         String inf = LogStackString.errInfo((Exception) t);
-                        tempStr = tempStr + inf;
+                        tempStr = tempStr + "  " + inf;
                     }
 
                     if (null != params) {
@@ -186,7 +186,7 @@ public class LoggerFacility {
                                 //使用Matcher.quoteReplacement避免有$替换出现问题的情况
                                 tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(inf));
                                 if (temp.equals(tempStr)) {
-                                    tempStr = tempStr + inf;
+                                    tempStr = tempStr + "  " + inf;
                                 }
                             } else {
                                 tempStr = tempStr.replaceFirst("\\{\\}", Matcher.quoteReplacement(String.valueOf(o)));

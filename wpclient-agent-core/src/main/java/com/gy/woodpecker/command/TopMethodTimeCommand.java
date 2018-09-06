@@ -7,6 +7,7 @@ import com.gy.woodpecker.textui.TTable;
 import com.gy.woodpecker.tools.DailyRollingFileWriter;
 import com.gy.woodpecker.tools.InvokeCost;
 import com.gy.woodpecker.tools.SimpleDateFormatHolder;
+import com.gy.woodpecker.transformer.SpyAsmTransformer;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
@@ -80,7 +81,8 @@ public class TopMethodTimeCommand extends AbstractCommand {
                     continue;
                 }
                 has = true;
-                SpyTransformer transformer = new SpyTransformer(null, true, true, this);
+                SpyAsmTransformer transformer = new SpyAsmTransformer(this,null,true,true);
+                //SpyTransformer transformer = new SpyTransformer(null, true, true, this);
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);

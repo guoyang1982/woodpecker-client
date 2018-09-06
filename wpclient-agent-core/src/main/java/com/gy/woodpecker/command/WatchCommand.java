@@ -10,6 +10,7 @@ import com.gy.woodpecker.textui.TKv;
 import com.gy.woodpecker.textui.TTable;
 import com.gy.woodpecker.textui.ext.TObject;
 import com.gy.woodpecker.tools.DailyRollingFileWriter;
+import com.gy.woodpecker.transformer.SpyAsmTransformer;
 import com.gy.woodpecker.transformer.SpyTransformer;
 import io.netty.channel.ChannelHandlerContext;
 import lombok.extern.slf4j.Slf4j;
@@ -89,7 +90,8 @@ public class WatchCommand extends AbstractCommand {
         for (Class clazz : classes) {
             if (clazz.getName().equals(classPattern)) {
                 has = true;
-                SpyTransformer transformer = new SpyTransformer(methodPattern, isParam, isReturn, this);
+                SpyAsmTransformer transformer = new SpyAsmTransformer(this,methodPattern,isParam,isReturn);
+                //SpyTransformer transformer = new SpyTransformer(methodPattern, isParam, isReturn, this);
                 inst.addTransformer(transformer, true);
                 try {
                     inst.retransformClasses(clazz);
