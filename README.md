@@ -30,7 +30,11 @@
    jps 获取应用的pid
    然后./woodpecker-launch.sh pid
    最后执行./woodpecker-run.sh ip port 就ok了
-
+   ### jvm其他参数（不必须）
+       -Dwoodpecker.applicationName=应用名
+       -Dwoodpecker.consolePort=控制端端口
+      如果jvm加上这个两个参数则会覆盖配置文件里的application.name和log.netty.server.port 主要为了方便多个应用在同一个服务器上用同一个
+      配置文件。（也可以用不同配置文件解决）
 ## 5.远程控制
    ### 客户端开了一个端口，可以用telnet进行远程控制，端口号可以在配置文件里配置，远程可以修改配置文件里的必要信息，命令：
       telnet ip port
