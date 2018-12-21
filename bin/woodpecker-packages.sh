@@ -35,4 +35,5 @@ cp ./woodpecker-launch.sh ${WOODPECKER_TARGET_DIR}
 
 cd ../target/
 zip -r wpclient-agent.zip wpclient-agent/
+cp wpclient-agent.zip ../docker
 cd -
