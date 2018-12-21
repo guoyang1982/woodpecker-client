@@ -1,4 +1,4 @@
-FROM java:8-jdk
+FROM frolvlad/alpine-oraclejdk8:slim
 
 COPY configure-agent.sh /usr/local/bin/
 COPY wpclient-agent.zip /opt/agent/
@@ -13,7 +13,8 @@ ARG PINPOINT_VERSION=${PINPOINT_VERSION:-1.8.0}
 ARG INSTALL_URL=https://github.com/naver/pinpoint/releases/download/${PINPOINT_VERSION}/pinpoint-agent-${PINPOINT_VERSION}.tar.gz
 #COPY pinpoint-agent-${PINPOINT_VERSION}.tar.gz /opt/agent/pinpoint-agent.tar.gz
 RUN mkdir -p /opt/agent/pinpoint-agent \
-    && curl -SL ${INSTALL_URL} -o /opt/agent/pinpoint-agent.tar.gz \
+    #&& curl -SL ${INSTALL_URL} -o /opt/agent/pinpoint-agent.tar.gz \
+    && wget -O /opt/agent/pinpoint-agent.tar.gz ${INSTALL_URL} \
     && gunzip /opt/agent/pinpoint-agent.tar.gz \
     && tar -xf /opt/agent/pinpoint-agent.tar -C /opt/agent/pinpoint-agent \
     && rm /opt/agent/pinpoint-agent.tar
