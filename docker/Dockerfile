@@ -7,7 +7,10 @@ RUN chmod a+x /usr/local/bin/configure-agent.sh \
     && chmod -R o+x /opt/agent \
     && cd /opt/agent \
     && unzip wpclient-agent.zip \
-    && rm wpclient-agent.zip
+    && rm wpclient-agent.zip \
+    && apk add --no-cache tzdata \
+    && cp /usr/share/zoneinfo/Asia/Shanghai /etc/localtime \
+    && echo "Asia/Shanghai" > /etc/timezone
 
 ARG PINPOINT_VERSION=${PINPOINT_VERSION:-1.8.0}
 ARG INSTALL_URL=https://github.com/naver/pinpoint/releases/download/${PINPOINT_VERSION}/pinpoint-agent-${PINPOINT_VERSION}.tar.gz
