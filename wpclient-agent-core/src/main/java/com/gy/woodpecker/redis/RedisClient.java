@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit;
 @Slf4j
 public class RedisClient {
     public static RedisClient RedisClientInstance = new RedisClient();
-    JedisCluster jedisCluster = null;
+    public JedisCluster jedisCluster = null;
     //连接超时
     int conTimeoutR = 1000;
     //读超时

@@ -116,18 +116,33 @@ public class LoggerFacility {
         }
 
         //启动redis
-        RedisClient.RedisClientInstance.init();
+        int count = 5;
+        do{
+            try{
+                RedisClient.RedisClientInstance.init();
+            }catch (Exception e){
+                log.info("redis init exception!",e);
+                try {
+                    log.info("retry redis init!count={}",count);
+                    Thread.sleep(1000);
+                } catch (InterruptedException e1) {
+                    e1.printStackTrace();
+                }
+            }
+        }while(RedisClient.RedisClientInstance.jedisCluster == null && count-- > 0);
+
+
         //启动健康检查
         if (!healthCheck.equals("false")) {
             RedisClient.RedisClientInstance.healthCheck(appName);
         }
-
 
         //处理要插桩的类
         System.out.println("?????????处理要插桩的类");
         ContextConfig.inst.addTransformer(new WoodpeckTransformer());
         //inst.addTransformer(new WoodpeckTransformer());
     }
+
 
     /**
      * @return
@@ -224,18 +239,23 @@ public class LoggerFacility {
 //        MessageBean obj = MsgPackUtil.toObject(raw1, MessageBean.class);
 //        System.out.println(obj.getAppName());
 
-        String sss = "ddddddd={}";
-        if (sss.contains("\\{\\}")) {
-            System.out.println("ffffffffffffff");
-        }
-        String ddd = null;
-        String str = "";
-        try {
-            ddd.equals("");
-        } catch (Exception e) {
-            str = LogStackString.errInfo(e) + "$a";
-        }
-        System.out.println(sss.replaceFirst("\\{\\}", Matcher.quoteReplacement(str)));
+//        String sss = "ddddddd={}";
+//        if (sss.contains("\\{\\}")) {
+//            System.out.println("ffffffffffffff");
+//        }
+//        String ddd = null;
+//        String str = "";
+//        try {
+//            ddd.equals("");
+//        } catch (Exception e) {
+//            str = LogStackString.errInfo(e) + "$a";
+//        }
+//        System.out.println(sss.replaceFirst("\\{\\}", Matcher.quoteReplacement(str)));
+
+        int count = 5;
+        do{
+       System.out.println("ddd");
+        }while(count-- > 0);
 
     }
 
