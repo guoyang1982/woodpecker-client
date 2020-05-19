@@ -11,7 +11,7 @@
 
     cd wpclient-agent/bin
     ./woodpecker-packages.sh
-    会在target生成wpclient-agent.zip运行文件，解压配置即可
+    会在docker下生成wpclient-agent.zip运行文件，解压配置即可
 ## 3.项目配置
     解压wpclient-agent.zip包修改里面的woodpecker.properties文件，需要配置application.name 这个是项目名称，
     agent.log.name是项目所使用的日志，目前支持logbak和log4j，redis.cluster.host集群服务器(ip:port,ip:port)
